@@ -1,0 +1,200 @@
+<!-- fragments/header.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="siteHeader">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* ======== HEADER PREMIER LEAGUE STYLE ======== */
+    .pl-header {
+      background-color: #1e1e1e;
+      color: #fff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .pl-header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1300px;
+    }
+
+    /* ===== Logo ===== */
+    .pl-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+    }
+
+    .pl-logo img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    /* ===== Navigation ===== */
+    .pl-nav {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .pl-nav a {
+      color: #ccc;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: color 0.3s, transform 0.2s;
+      position: relative;
+    }
+
+    .pl-nav a:hover {
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .pl-nav a.active {
+      color: #fff;
+    }
+
+    .pl-nav a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      width: 50%;
+      height: 2px;
+      background: #fff;
+      transform: translateX(-50%);
+    }
+
+    /* ===== Right Side ===== */
+    .pl-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-signin {
+      background: #00ff87;
+      color: #000;
+      font-weight: 600;
+      border: none;
+      border-radius: 25px;
+      padding: 8px 18px;
+      transition: all 0.3s;
+    }
+
+    .btn-signin:hover {
+      background: #00e076;
+      transform: translateY(-2px);
+    }
+
+    /* ===== Dropdown for user ===== */
+    .user-dropdown .dropdown-toggle {
+      background: transparent !important;
+      border: none !important;
+      color: white !important;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-dropdown .dropdown-menu {
+      background-color: #1e1e1e !important;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px 0;
+    }
+
+    .user-dropdown .dropdown-item {
+      color: #ccc !important;
+      transition: all 0.3s;
+    }
+
+    .user-dropdown .dropdown-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white !important;
+    }
+
+    body {
+      padding-top: 70px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    @media (max-width: 992px) {
+      .pl-nav {
+        display: none;
+      }
+    }
+  </style>
+
+  <header class="pl-header">
+    <div class="container">
+      <!-- Logo -->
+      <a th:href="@{/home}" class="pl-logo">
+        <span>SuperLeague</span>
+      </a>
+
+      <!-- Navigation -->
+      <nav class="pl-nav">
+        <a th:href="@{/match/fixture}" th:classappend="${page == 'fixtures'} ? 'active'">Fixtures</a>
+        <a th:href="@{/match}" th:classappend="${page == 'results'} ? 'active'">Results</a>
+        <a th:href="@{/tables(season=${#calendars.year(#calendars.createNow())})}" th:classappend="${page == 'tables'} ? 'active'">Tables</a>
+        <a th:href="@{/news}" th:classappend="${page == 'news'} ? 'active'">News</a>
+        <a th:href="@{/club}" th:classappend="${page == 'clubs'} ? 'active'">Clubs</a>
+        <a th:href="@{/product}" th:classappend="${page == 'products'} ? 'active'">Shop</a>
+        <a th:href="@{/stastics(year=${#dates.format(#dates.createNow(), 'yyyy')})}" th:classappend="${page == 'ranking'} ? 'active'">Stats</a>
+        <a th:href="@{/feedback}" th:classappend="${page == 'feedback'} ? 'active'">Feedback</a>
+      </nav>
+
+      <!-- Right Side -->
+      <div class="pl-right">
+        <!-- Nếu chưa đăng nhập -->
+        <a sec:authorize="isAnonymous()" th:href="@{/auth/login}" class="btn-signin">Sign In</a>
+
+        <!-- Nếu đã đăng nhập -->
+        <div class="dropdown user-dropdown" sec:authorize="isAuthenticated()">
+          <button class="dropdown-toggle" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i>
+            <span sec:authentication="name"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li sec:authorize="hasRole('CLUB_MANAGER')">
+              <a class="dropdown-item" th:href="@{/clubmanager}">Club Information</a>
+            </li>
+            <li sec:authorize="hasRole('ADMIN')">
+              <a class="dropdown-item" th:href="@{/admin}">Admin Dashboard</a>
+            </li>
+            <li sec:authorize="hasRole('USER')">
+              <a class="dropdown-item" th:href="@{/user/profile}">Profile</a>
+            </li>
+            <li><a class="dropdown-item" th:href="@{/auth/logout}">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+</div>
+</body>
+</html>

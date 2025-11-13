@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Thống kê cầu thủ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            min-height: 100vh;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #2d3748;
+        }
+
+        .main-header {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            padding: 2rem 0;
+            margin-bottom: 3rem;
+            box-shadow: 0 8px 32px rgba(75, 0, 125, 0.3);
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .season-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-flow: row;
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .stats-category {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(75, 0, 125, 0.1);
+            border: 1px solid rgba(75, 0, 125, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stats-category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+
+        }
+
+        .players-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .players-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .players-container::-webkit-scrollbar-track {
+            background: rgba(75, 0, 125, 0.1);
+            border-radius: 3px;
+        }
+
+        .players-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+
+            border-radius: 3px;
+        }
+
+        .stats-category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(75, 0, 125, 0.2);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(139, 92, 246, 0.1);
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .category-icon i {
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .category-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00ff87;
+            flex: 1;
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            margin-bottom: 0.6rem;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(75, 0, 125, 0.08);
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            min-height: 80px;
+        }
+
+        .player-row:hover {
+            background: rgba(75, 0, 125, 0.05);
+            border-color: rgba(75, 0, 125, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(75, 0, 125, 0.15);
+        }
+
+        .position-badge {
+            position: absolute;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 15px rgba(75, 0, 125, 0.4);
+            border: 3px solid white;
+            flex-shrink: 0;
+        }
+
+        .player-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(75, 0, 125, 0.3);
+            margin-left: 1.8rem;
+            margin-right: 0.8rem;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .player-row:hover .player-avatar {
+            border-color: #00ff87;
+            transform: scale(1.05);
+        }
+
+        .player-details {
+            flex: 1;
+            margin-left: 0.5rem;
+        }
+
+        .player-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #00ff87;
+            margin-bottom: 0.2rem;
+            line-height: 1.2;
+        }
+
+        .player-meta {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(75, 0, 125, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon {
+            font-size: 1rem;
+        }
+
+        /* Top 3 special styling */
+        .player-row:nth-child(1) .position-badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+            color: #92400e;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .player-row:nth-child(2) .position-badge {
+            background: linear-gradient(135deg, #c0c0c0 0%, #e5e7eb 100%);
+            color: #374151;
+            box-shadow: 0 4px 15px rgba(192, 192, 192, 0.4);
+        }
+
+        .player-row:nth-child(3) .position-badge {
+            background: linear-gradient(135deg, #cd7f32 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(205, 127, 50, 0.4);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+                padding: 0 0.5rem;
+            }
+            
+            .stats-category {
+                height: 1000px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0 0.5rem;
+            }
+
+            .main-title {
+                font-size: 2rem;
+            }
+
+            .stats-category {
+                height: 500px;
+            }
+
+            .player-row {
+                padding: 0.7rem;
+                min-height: 70px;
+            }
+
+            .player-avatar {
+                width: 45px;
+                height: 45px;
+                margin-left: 1.5rem;
+            }
+
+            .category-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 1.6rem;
+            }
+
+            .season-badge {
+                font-size: 1rem;
+                padding: 0.4rem 1rem;
+            }
+
+            .stats-category {
+                padding: 1rem;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats-category {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .stats-category:nth-child(1) { animation-delay: 0.1s; }
+        .stats-category:nth-child(2) { animation-delay: 0.2s; }
+        .stats-category:nth-child(3) { animation-delay: 0.3s; }
+        .stats-category:nth-child(4) { animation-delay: 0.4s; }
+    </style>
+</head>
+
+<body>
+    <div th:replace="fragments/header :: siteHeader"></div>
+    <div th:replace="fragments/chatbox :: chatBoxFragment"></div>
+    <div class="main-header">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2">
+                <h1 class="main-title mb-0">
+                    <i class="fas fa-chart-line me-3"></i>
+                    Thống kê cầu thủ
+                </h1>
+                <form method="get" action="/stastics" class="d-flex align-items-center" style="gap: 8px;">
+                    <label for="seasonSelect" class="me-2 fw-semibold text-white">Chọn năm:</label>
+                    <select name="year" id="seasonSelect" class="form-select w-auto">
+                        <option th:value="2024" th:selected="${param.year == null or param.year == '' or param.year == '2024'}">2024</option>
+                        <option th:value="2025" th:selected="${param.year == '2025'}">2025</option>
+                        <option th:value="2026" th:selected="${param.year == '2026'}">2026</option>
+                        <option th:value="2027" th:selected="${param.year == '2027'}">2027</option>
+                    </select>
+                    <button type="submit" class="btn btn-light ms-2">Xem</button>
+                </form>
+            </div>
+            <div class="text-center">
+                <span class="season-badge">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Mùa giải <span th:text="${param.year != null && param.year != '' ? param.year : '2024'}">2024</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+        <div class="stats-grid">
+
+            <!-- Ghi bàn -->
+            <div class="stats-category">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-futbol"></i>
+                    </div>
+                    <h3 class="category-title">Vua phá lưới</h3>
+                </div>
+                <div class="players-container">
+                    <div th:each="entry, iterStat : ${rankingPlayerGoal}" class="player-row">
+                        <div class="position-badge" th:text="${iterStat.index + 1}">1</div>
+                        <img class="player-avatar" th:src="${entry.key.playerImgPath}" onerror="this.src='/images/default.png'" alt="player">
+                        <div class="player-details">
+                            <div class="player-name" th:text="${entry.key.playerFullName}">Lionel Messi</div>
+                            <div class="player-meta">
+                                <span th:text="${entry.key.playerPosition}">FW</span> • 
+                                <span th:text="${entry.key.club.clubName}">Barcelona</span>
+                            </div>
+                        </div>
+                        <div class="stat-value">
+                            <span th:text="${entry.value.totalGoals}">25</span>
+                            <i class="fas fa-futbol stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kiến tạo -->
+            <div class="stats-category">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h3 class="category-title">Vua kiến tạo</h3>
+                </div>
+                <div class="players-container">
+                    <div th:each="entry, iterStat : ${rankingPlayerAssist}" class="player-row">
+                        <div class="position-badge" th:text="${iterStat.index + 1}">1</div>
+                        <img class="player-avatar" th:src="${entry.key.playerImgPath}" onerror="this.src='/images/default.png'" alt="player">
+                        <div class="player-details">
+                            <div class="player-name" th:text="${entry.key.playerFullName}">Kevin De Bruyne</div>
+                            <div class="player-meta">
+                                <span th:text="${entry.key.playerPosition}">MF</span> • 
+                                <span th:text="${entry.key.club.clubName}">Manchester City</span>
+                            </div>
+                        </div>
+                        <div class="stat-value">
+                            <span th:text="${entry.value.totalAssists}">18</span>
+                            <i class="fas fa-hands-helping stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Giữ sạch lưới -->
+            <div class="stats-category">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="category-title">Thủ môn xuất sắc</h3>
+                </div>
+                <div class="players-container">
+                    <div th:each="entry, iterStat : ${rankingPlayerCleanSheet}" class="player-row">
+                        <div class="position-badge" th:text="${iterStat.index + 1}">1</div>
+                        <img class="player-avatar" th:src="${entry.key.playerImgPath}" onerror="this.src='/images/default.png'" alt="player">
+                        <div class="player-details">
+                            <div class="player-name" th:text="${entry.key.playerFullName}">Alisson Becker</div>
+                            <div class="player-meta">
+                                <span th:text="${entry.key.playerPosition}">GK</span> • 
+                                <span th:text="${entry.key.club.clubName}">Liverpool</span>
+                            </div>
+                        </div>
+                        <div class="stat-value">
+                            <span th:text="${entry.value.cleanSheets}">15</span>
+                            <i class="fas fa-shield-alt stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phút thi đấu -->
+            <div class="stats-category">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="category-title">Máy thi đấu</h3>
+                </div>
+                <div class="players-container">
+                    <div th:each="entry, iterStat : ${rankingPlayerMinutedPlayed}" class="player-row">
+                        <div class="position-badge" th:text="${iterStat.index + 1}">1</div>
+                        <img class="player-avatar" th:src="${entry.key.playerImgPath}" onerror="this.src='/images/default.png'" alt="player">
+                        <div class="player-details">
+                            <div class="player-name" th:text="${entry.key.playerFullName}">Virgil van Dijk</div>
+                            <div class="player-meta">
+                                <span th:text="${entry.key.playerPosition}">DF</span> • 
+                                <span th:text="${entry.key.club.clubName}">Liverpool</span>
+                            </div>
+                        </div>
+                        <div class="stat-value">
+                            <span th:text="${entry.value.totalMinutes}">3420</span>
+                            <i class="fas fa-clock stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer fragment -->
+    <div th:replace="fragments/footer :: siteFooter"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

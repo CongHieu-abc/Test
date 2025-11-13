@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${player.playerFullName} + ' Profile'">Player Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .player-header {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            color: white;
+            padding: 3rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-header img {
+            height: 220px;
+            object-fit: contain;
+        }
+
+        .player-name {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .player-surname {
+            font-size: 3rem;
+            font-weight: 900;
+        }
+
+        .player-number {
+            font-size: 6rem;
+            font-weight: bold;
+            opacity: 0.2;
+        }
+
+        .nav-tabs {
+            background-color: #fff;
+            border-bottom: 2px solid #ccc;
+        }
+
+        .nav-link.active {
+            font-weight: bold;
+            color: #c70101;
+            border-bottom: 3px solid #c70101;
+        }
+
+        .profile-section {
+            background-color: #fff;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-box {
+            background-color: #f2f2f2;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .stat-box .label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .career-table th,
+        .career-table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="fragments/header :: siteHeader"></div>
+    <div th:replace="fragments/chatbox :: chatBoxFragment"></div>
+    <div class="player-header">
+        <div>
+            <div class="player-name" th:text="${player.playerFullName}">Altay</div>
+            <div class="player-surname" th:text="${player.playerFullName}">Bayindir</div>
+            <ul class="nav nav-tabs mt-3">
+                <li class="nav-item"><a class="nav-link active" href="#">Overview</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Stats</a></li>
+            </ul>
+        </div>
+        <img th:src="@{{img}(img=${player.playerImgPath})}" alt="player photo">
+        <div class="player-number" th:text="${player.playerNumber}">1</div>
+    </div>
+
+    <div class="container">
+        <div class="profile-section row">
+            <div class="col-md-4">
+                <h5>Personal Details</h5>
+                <p><strong>Club:</strong> <span th:text="${player.club.clubName}">Manchester United</span></p>
+                <p><strong>Position:</strong> <span th:text="${player.playerPosition.name()}">Goalkeeper</span></p>
+                <p>
+                    <strong>Nationality:</strong>
+                    <img th:src="@{'/images/flags/' + ${player.playerNationaly} + '.svg'}" alt="flag"
+                        style="height: 16px; margin-right: 4px;">
+                    <span th:text="${player.playerNationaly}">Turkey</span>
+                </p>
+                <p id="dobLine"><strong>Date of Birth:</strong> <span></span> (<span></span>)</p>
+                <p id="heightLine"><strong>Height:</strong> <span></span></p>
+                <p id="weightLine"><strong>Weight:</strong> <span></span></p>
+            </div>
+            <div class="col-md-4">
+                <h5>Premier League Record</h5>
+                <div class="row g-2">
+                    <div class="col-6 stat-box">
+                        <div class="value" th:text="${player.playerAppearances}">4</div>
+                        <div class="label">Appearances</div>
+                    </div>
+                    <div class="col-6 stat-box">
+                        <div class="value" th:text="${player.playerCleanSheets}">4</div>
+                        <div class="label">Clean sheets</div>
+                    </div>
+                    <div class="col-6 stat-box">
+                        <div class="value" th:text="${player.playerScores}">0</div>
+                        <div class="label">Goals</div>
+                    </div>
+                    <div class="col-6 stat-box">
+                        <div class="value" th:text="${player.playerAssist}">0</div>
+                        <div class="label">Assists</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h5>Premier League Playing Career</h5>
+            <table class="table table-striped career-table">
+                <thead>
+                    <tr>
+                        <th>Season</th>
+                        <th>Club</th>
+                        <th>Apps (subs)</th>
+                        <th>Goals</th>
+                        <th>More</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr th:each="seasonCareer : ${career}">
+                        <td th:text="${seasonCareer.season}">2025/2026</td>
+                        <td th:text="${seasonCareer.clubName}">Manchester United</td>
+                        <td th:text="${seasonCareer.appeared}">4</td>
+                        <td th:text="${seasonCareer.goals}">0</td>
+                        <td>→</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            let infoText = /*[[${player.playerInformation}]]*/ 'dob: 1998-04-14\nheight: 198\nweight: 80';
+
+            if (!infoText || infoText === 'null') {
+                infoText = 'dob: 2000-01-01\nheight: 180\nweight: 75';
+            }
+
+            const infoLines = infoText.split('\n').reduce((acc, line) => {
+                const [key, value] = line.split(':').map(s => s.trim());
+                acc[key] = value;
+                return acc;
+            }, {});
+
+            const dob = new Date(infoLines['dob']);
+            const today = new Date();
+            const age = today.getFullYear() - dob.getFullYear() -
+                ((today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) ? 1 : 0);
+
+            const dobSpans = document.querySelectorAll('#dobLine span');
+            if (dobSpans.length === 2) {
+                dobSpans[0].textContent = dob.toLocaleDateString('en-GB');
+                dobSpans[1].textContent = age;
+            }
+
+            const heightSpan = document.querySelector('#heightLine span');
+            if (heightSpan) heightSpan.textContent = infoLines['height'] + ' cm';
+
+            const weightSpan = document.querySelector('#weightLine span');
+            if (weightSpan) weightSpan.textContent = infoLines['weight'] + ' kg';
+        });
+    </script>
+</body>
+
+</html>

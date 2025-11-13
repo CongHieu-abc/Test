@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tickets | SuperLeague</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6f42c1;
+            --dark-purple: #4a2c7a;
+            --light-purple: #8b5cf6;
+            --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --stadium-green: #2d5016;
+            --field-green: #228b22;
+            --vip-gold: #ffd700;
+            --premium-silver: #c0c0c0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #212529 !important;
+            color: #f8f9fa;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: none;
+            z-index: -1;
+            animation: none;
+        }
+
+        @keyframes backgroundFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(1deg);
+            }
+        }
+
+         .hero {
+      background: linear-gradient(180deg, rgba(0, 255, 135, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%),
+        url('/images/hero-banner.png') center/cover no-repeat;
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #00ff87;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 25px rgba(0, 255, 135, 0.5);
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #ccc;
+    }
+
+        .team.text-end {
+            margin-left: auto;
+            justify-content: flex-end;
+            text-align: right;
+            flex: 1;
+        }
+
+        .match-info {
+            max-width: 1000px;
+            background: #212529;
+            margin: 1.2rem auto 0 auto;
+            padding: 1.6rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+        }
+
+        .match-info::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #00ff87, transparent); border-radius: 12px 12px 0 0; }
+
+        .match-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .team img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .team img:hover {
+            transform: scale(1.1);
+        }
+
+        .team span { font-weight: 600; font-size: 1.05rem; color: #f8f9fa; }
+
+        .score { font-weight: 800; font-size: 2.2rem; color: #fff; flex: 0 0 auto; }
+
+        .venue { font-size: 0.95rem; color: #adb5bd; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; margin-top: 0.5rem; }
+
+        .stadium-wrapper { display: grid; grid-template-columns: 1fr 320px; gap: 20px; padding: 1rem; margin-top: 1rem; }
+
+        .stadium-container { position: relative; background: #1a1a1a; border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); }
+
+        .stadium-title { text-align: center; margin-bottom: 1rem; color: #f8f9fa; font-weight: 700; font-size: 1.2rem; }
+
+        canvas {
+            border-radius: 15px;
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        canvas:hover {
+            transform: scale(1.02);
+        }
+
+        .legend { min-width: 280px; padding: 16px; background: #1a1a1a; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); }
+
+        .legend h5 { color: #f8f9fa; font-weight: 700; margin-bottom: 1rem; text-align: center; font-size: 1.1rem; }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .legend-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: rgba(255, 255, 255, 0.2);
+            transition: width 0.3s ease;
+        }
+
+        .legend-item:hover::before {
+            width: 100%;
+        }
+
+        .legend-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 15px;
+        }
+
+        .area-info {
+            flex: 1;
+            margin-left: 8px;
+        }
+
+        .area-name {
+            font-weight: 600;
+            font-size: 1rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .ticket-details {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .vip-count,
+        .std-count {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 8px;
+            min-width: 60px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .vip-count {
+            background: rgba(255, 215, 0, 0.8);
+            color: #8b4513;
+        }
+
+        .std-count { background: rgba(255, 255, 255, 0.12); color: #f8f9fa; }
+
+        /* Color coding for ticket availability */
+        .vip-count.high-stock,
+        .std-count.high-stock {
+            background: rgba(34, 197, 94, 0.8);
+            color: white;
+        }
+
+        .vip-count.medium-stock,
+        .std-count.medium-stock {
+            background: rgba(251, 191, 36, 0.8);
+            color: white;
+        }
+
+        .vip-count.low-stock,
+        .std-count.low-stock {
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+            animation: pulse-warning 2s infinite;
+        }
+
+        .vip-count.no-stock,
+        .std-count.no-stock {
+            background: rgba(107, 114, 128, 0.8);
+            color: white;
+            opacity: 0.6;
+        }
+
+        @keyframes pulse-warning {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Stadium-like colors */
+        .area-A {
+            background: linear-gradient(135deg, #8b5a3c, #a0522d);
+            color: white;
+        }
+
+        .area-B {
+            background: linear-gradient(135deg, #4682b4, #5f9ea0);
+            color: white;
+        }
+
+        .area-C {
+            background: linear-gradient(135deg, #32cd32, #228b22);
+            color: white;
+        }
+
+        .area-D {
+            background: linear-gradient(135deg, #ff6347, #dc143c);
+            color: white;
+        }
+
+        .area-E {
+            background: linear-gradient(135deg, #9370db, #663399);
+            color: white;
+        }
+
+        .area-F {
+            background: linear-gradient(135deg, #ffd700, #daa520);
+            color: #333;
+        }
+
+        .instruction { text-align: center; color: #f8f9fa; font-size: 1rem; margin-bottom: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.06); border-radius: 10px; border-left: 4px solid #00ff87; }
+
+        /* Modal improvements */
+        .modal-content { border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: #1e1e1e; color: #f8f9fa; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); overflow: hidden; }
+
+        .modal-header { background: #1e1e1e; color: #f8f9fa; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 1.2rem 1.5rem; }
+
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .table th { color: #f8f9fa; font-weight: 600; border: none; padding: 12px 8px; }
+
+        .table td { border: none; padding: 12px 8px; color: #adb5bd; }
+
+        .table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.08); }
+
+        #ticketBenefits { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem; margin: 1rem 0; }
+
+        #ticketBenefits h6 { color: #f8f9fa; font-weight: 600; margin-bottom: 0.8rem; }
+
+        #benefitsList li { margin-bottom: 0.5rem; color: #adb5bd; }
+
+        .modal-footer { border-top: 1px solid rgba(255,255,255,0.08); padding: 1.2rem 1.5rem; background: rgba(0,0,0,0.2); }
+
+        .btn-primary { background: #00ff87; color: #000; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 255, 135, 0.35); filter: brightness(0.95); }
+
+        .btn-secondary { background: #2a2a2a; color: #f8f9fa; border: 1px solid rgba(255,255,255,0.12); padding: 12px 24px; border-radius: 10px; font-weight: 600; }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .stadium-wrapper {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .match-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .score {
+                font-size: 2.5rem;
+            }
+
+            .legend {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="fragments/header :: siteHeader"></div>
+    <div class="hero">
+            <h2 th:text="${match.matchTitle}">Premier League Championship</h2>
+            <p><i class="fas fa-calendar-alt me-2"></i><span
+                    th:text="${#temporals.format(match.matchStartTime, 'dd MMM yyyy, HH:mm')}">25 Dec 2024, 20:00</span>
+            </p>
+    </div>
+
+    <main class="container">
+        <div class="match-info">
+            <div class="match-row">
+                <div class="team">
+                    <img th:src="@{{logo}(logo=${match.matchClubStats[0].club.clubLogoPath})}" alt="Home Logo">
+                    <span th:text="${match.matchClubStats[0].club.clubName}">Manchester United</span>
+                </div>
+
+                <div class="score"
+                    th:text="${match.matchClubStats[0].matchClubStatScore} + ' - ' + ${match.matchClubStats[1].matchClubStatScore}">
+                    2 - 1
+                </div>
+
+                <div class="team text-end">
+                    <span th:text="${match.matchClubStats[1].club.clubName}">Liverpool FC</span>
+                    <img th:src="@{{logo}(logo=${match.matchClubStats[1].club.clubLogoPath})}" alt="Away Logo">
+                </div>
+            </div>
+            <div class="venue">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <span th:text="${match.matchDescription}">Old Trafford Stadium</span>
+                <span class="mx-2">•</span>
+                <span th:text="${match.matchClubStats[0].club.clubStadium}">Manchester, England</span>
+            </div>
+        </div>
+
+        <div class="instruction">
+            <i class="fas fa-info-circle me-2"></i>
+            Nhấp vào khu vực trên sơ đồ sân vận động hoặc chọn khu bên phải để xem chi tiết vé
+        </div>
+
+        <div class="stadium-wrapper">
+            <div class="stadium-container">
+                <div class="stadium-title">
+                    <i class="fas fa-futbol me-2"></i>
+                    Sơ đồ sân vận động
+                </div>
+                <canvas id="stadiumCanvas" width="1000" height="700"></canvas>
+            </div>
+
+            <div class="legend">
+                <h5><i class="fas fa-list me-2"></i>Khu vực ghế ngồi</h5>
+                <div class="legend-item area-A">
+                    <i class="fas fa-chair me-2"></i>
+                    <div class="area-info">
+                        <span class="area-name">Khu A</span>
+                        <div class="ticket-details">
+                            <span class="vip-count" id="vip-A">VIP: 0</span>
+                            <span class="std-count" id="std-A">Standard: 0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="legend-item area-B">
+                    <i class="fas fa-chair me-2"></i>
+                    <div class="area-info">
+                        <span class="area-name">Khu B</span>
+                        <div class="ticket-details">
+                            <span class="vip-count" id="vip-B">VIP: 0</span>
+                            <span class="std-count" id="std-B">Standard: 0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="legend-item area-C">
+                    <i class="fas fa-chair me-2"></i>
+                    <div class="area-info">
+                        <span class="area-name">Khu C</span>
+                        <div class="ticket-details">
+                            <span class="vip-count" id="vip-C">VIP: 0</span>
+                            <span class="std-count" id="std-C">Standard: 0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="legend-item area-D">
+                    <i class="fas fa-chair me-2"></i>
+                    <div class="area-info">
+                        <span class="area-name">Khu D</span>
+                        <div class="ticket-details">
+                            <span class="vip-count" id="vip-D">VIP: 0</span>
+                            <span class="std-count" id="std-D">Standard: 0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="legend-item area-E">
+                    <i class="fas fa-chair me-2"></i>
+                    <div class="area-info">
+                        <span class="area-name">Khu E</span>
+                        <div class="ticket-details">
+                            <span class="vip-count" id="vip-E">VIP: 0</span>
+                            <span class="std-count" id="std-E">Standard: 0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="legend-item area-F">
+                    <i class="fas fa-chair me-2"></i>
+                    <div class="area-info">
+                        <span class="area-name">Khu F</span>
+                        <div class="ticket-details">
+                            <span class="vip-count" id="vip-F">VIP: 0</span>
+                            <span class="std-count" id="std-F">Standard: 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" action="http://localhost:8080/ticket/bookingticket">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ticketModalLabel">
+                            <i class="fas fa-ticket-alt me-2"></i>
+                            Chi tiết vé xem đấu
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr>
+                                    <th><i class="fas fa-tag me-2"></i>Tiêu đề</th>
+                                    <td id="modalTicketTitle"></td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-star me-2"></i>Loại vé</th>
+                                    <td id="modalTicketType"></td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-map me-2"></i>Khu vực</th>
+                                    <td id="modalTicketArea"></td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-users me-2"></i>Còn lại</th>
+                                    <td id="modalTicketAmount"></td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-dollar-sign me-2"></i>Giá vé</th>
+                                    <td id="modalTicketPrice"></td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-sticky-note me-2"></i>Ghi chú</th>
+                                    <td id="modalTicketNote"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="ticketId" id="hiddenTicketId">
+
+                        <div id="ticketBenefits" class="mt-3">
+                            <h6 style="color: black;"><i class="fas fa-gift me-2"></i>Quyền lợi đi kèm:</h6>
+                            <ul id="benefitsList" class="mb-0 ps-3"></ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Đặt vé ngay
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>
+                            Đóng
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const tickets = JSON.parse(/*[[${ticketsJson}]]*/ '[]');
+
+        const canvas = document.getElementById('stadiumCanvas');
+        const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        // Stadium-like colors with purple theme
+        const baseColors = {
+            'A': '#8b5a3c', // Brown - Premium leather seats
+            'B': '#4682b4', // Steel blue - Corporate seats  
+            'C': '#32cd32', // Green - Standard seats
+            'D': '#ff6347', // Red - General admission
+            'E': '#9370db', // Purple - Family section
+            'F': '#ffd700'  // Gold - Student section
+        };
+
+        const typeShades = {
+            'VIP': 1.1,      // Slightly brighter for VIP
+            'Standard': 0.9   // Slightly darker for Standard
+        };
+
+        const positionMap = {};
+
+        function shadeColor(hex, factor) {
+            let r = parseInt(hex.substring(1, 3), 16);
+            let g = parseInt(hex.substring(3, 5), 16);
+            let b = parseInt(hex.substring(5, 7), 16);
+
+            r = Math.min(255, Math.max(0, Math.floor(r * factor)));
+            g = Math.min(255, Math.max(0, Math.floor(g * factor)));
+            b = Math.min(255, Math.max(0, Math.floor(b * factor)));
+
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function drawStadiumInfrastructure() {
+            // Stadium entrance gates
+            const gateWidth = 15;
+            const gateHeight = 25;
+            const gatePositions = [
+                { x: centerX, y: centerY - 240 }, // North
+                { x: centerX + 200, y: centerY }, // East
+                { x: centerX, y: centerY + 240 }, // South
+                { x: centerX - 200, y: centerY }  // West
+            ];
+
+            gatePositions.forEach((gate, index) => {
+                // Gate structure
+                ctx.fillStyle = '#4a5568';
+                ctx.fillRect(gate.x - gateWidth / 2, gate.y - gateHeight / 2, gateWidth, gateHeight);
+
+                // Gate roof
+                ctx.fillStyle = '#2d3748';
+                ctx.fillRect(gate.x - gateWidth / 2 - 3, gate.y - gateHeight / 2 - 5, gateWidth + 6, 8);
+
+                // Gate entrance
+                ctx.fillStyle = '#1a202c';
+                ctx.fillRect(gate.x - gateWidth / 2 + 3, gate.y - gateHeight / 2 + 3, gateWidth - 6, gateHeight - 6);
+
+                // Gate number
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`G${index + 1}`, gate.x, gate.y + 3);
+            });
+
+            // Stadium lights
+            const lightPositions = [
+                { x: centerX - 150, y: centerY - 180 },
+                { x: centerX + 150, y: centerY - 180 },
+                { x: centerX - 150, y: centerY + 180 },
+                { x: centerX + 150, y: centerY + 180 }
+            ];
+
+            lightPositions.forEach(light => {
+                // Light pole
+                ctx.strokeStyle = '#718096';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(light.x, light.y);
+                ctx.lineTo(light.x, light.y - 40);
+                ctx.stroke();
+
+                // Light fixture
+                ctx.fillStyle = '#4a5568';
+                ctx.fillRect(light.x - 8, light.y - 45, 16, 8);
+
+                // Light glow effect
+                const lightGlow = ctx.createRadialGradient(light.x, light.y - 41, 0, light.x, light.y - 41, 30);
+                lightGlow.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+                lightGlow.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                ctx.fillStyle = lightGlow;
+                ctx.beginPath();
+                ctx.arc(light.x, light.y - 41, 30, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+
+            // Parking areas
+            const parkingAreas = [
+                { x: centerX - 300, y: centerY - 150, width: 80, height: 60 },
+                { x: centerX + 220, y: centerY - 150, width: 80, height: 60 },
+                { x: centerX - 300, y: centerY + 90, width: 80, height: 60 },
+                { x: centerX + 220, y: centerY + 90, width: 80, height: 60 }
+            ];
+
+            parkingAreas.forEach((area, index) => {
+                // Parking area background
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillRect(area.x, area.y, area.width, area.height);
+
+                // Parking lines
+                ctx.strokeStyle = '#cbd5e0';
+                ctx.lineWidth = 1;
+                for (let i = 1; i < 6; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(area.x + (area.width / 6) * i, area.y);
+                    ctx.lineTo(area.x + (area.width / 6) * i, area.y + area.height);
+                    ctx.stroke();
+                }
+
+                // Parking label
+                ctx.fillStyle = '#4a5568';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`P${index + 1}`, area.x + area.width / 2, area.y + area.height / 2 + 3);
+
+                // Some parked cars
+                for (let i = 0; i < 3; i++) {
+                    const carX = area.x + 10 + i * 20;
+                    const carY = area.y + 15;
+                    ctx.fillStyle = ['#ff6b6b', '#4ecdc4', '#45b7d1'][i % 3];
+                    ctx.fillRect(carX, carY, 15, 8);
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.fillRect(carX + 2, carY + 2, 11, 4);
+                }
+            });
+
+            // Stadium info screens
+            const screenPositions = [
+                { x: centerX - 100, y: centerY - 200 },
+                { x: centerX + 100, y: centerY - 200 }
+            ];
+
+            screenPositions.forEach(screen => {
+                // Screen frame
+                ctx.fillStyle = '#2d3748';
+                ctx.fillRect(screen.x - 15, screen.y - 10, 30, 20);
+
+                // Screen
+                ctx.fillStyle = '#1a202c';
+                ctx.fillRect(screen.x - 12, screen.y - 7, 24, 14);
+
+                // Screen content (simulated)
+                ctx.fillStyle = '#00ff00';
+                ctx.font = '8px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('LIVE', screen.x, screen.y - 2);
+                ctx.fillText('SCORE', screen.x, screen.y + 6);
+            });
+
+            // Walkways/paths
+            ctx.strokeStyle = '#a0aec0';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+
+            // Circular walkway around stadium
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, 380, 250, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // Paths to gates
+            gatePositions.forEach(gate => {
+                ctx.beginPath();
+                ctx.moveTo(gate.x, gate.y);
+                if (gate.y < centerY) { // North gate
+                    ctx.lineTo(gate.x, gate.y - 50);
+                } else if (gate.y > centerY) { // South gate
+                    ctx.lineTo(gate.x, gate.y + 50);
+                } else if (gate.x < centerX) { // West gate
+                    ctx.lineTo(gate.x - 50, gate.y);
+                } else { // East gate
+                    ctx.lineTo(gate.x + 50, gate.y);
+                }
+                ctx.stroke();
+            });
+
+            ctx.setLineDash([]); // Reset line dash
+
+            // Decorative trees/landscaping
+            const treePositions = [
+                { x: centerX - 380, y: centerY - 100 },
+                { x: centerX - 380, y: centerY + 100 },
+                { x: centerX + 380, y: centerY - 100 },
+                { x: centerX + 380, y: centerY + 100 },
+                { x: centerX - 250, y: centerY - 280 },
+                { x: centerX + 250, y: centerY - 280 },
+                { x: centerX - 250, y: centerY + 280 },
+                { x: centerX + 250, y: centerY + 280 }
+            ];
+
+            treePositions.forEach(tree => {
+                // Tree trunk
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(tree.x - 2, tree.y - 5, 4, 10);
+
+                // Tree crown
+                ctx.fillStyle = '#228B22';
+                ctx.beginPath();
+                ctx.arc(tree.x, tree.y - 8, 8, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // Tree highlight
+                ctx.fillStyle = '#32CD32';
+                ctx.beginPath();
+                ctx.arc(tree.x - 2, tree.y - 10, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+
+        function drawStadiumField() {
+            // Stadium background with more realistic grass texture
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 300);
+            gradient.addColorStop(0, '#32cd32');
+            gradient.addColorStop(0.3, '#228b22');
+            gradient.addColorStop(0.7, '#2d5016');
+            gradient.addColorStop(1, '#1a3009');
+
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, 180, 100, 0, 0, 2 * Math.PI);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Field border with double lines
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Inner field border
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, 175, 95, 0, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Center circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Inner center circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Center dot
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            // Goals with more detail
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(centerX - 20, centerY - 100 - 8, 40, 12);
+            ctx.fillRect(centerX - 20, centerY + 100 - 4, 40, 12);
+
+            // Goal posts
+            ctx.fillStyle = '#cccccc';
+            ctx.fillRect(centerX - 22, centerY - 100 - 10, 3, 15);
+            ctx.fillRect(centerX + 19, centerY - 100 - 10, 3, 15);
+            ctx.fillRect(centerX - 22, centerY + 100 - 5, 3, 15);
+            ctx.fillRect(centerX + 19, centerY + 100 - 5, 3, 15);
+
+            // Penalty areas
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(centerX - 40, centerY - 100 - 20, 80, 25);
+            ctx.strokeRect(centerX - 40, centerY + 100 - 5, 80, 25);
+
+            // Small penalty areas
+            ctx.strokeRect(centerX - 20, centerY - 100 - 10, 40, 15);
+            ctx.strokeRect(centerX - 20, centerY + 100 - 5, 40, 15);
+
+            // Corner arcs
+            const cornerRadius = 8;
+            // Top-left corner
+            ctx.beginPath();
+            ctx.arc(centerX - 180, centerY - 100, cornerRadius, 0, Math.PI / 2);
+            ctx.stroke();
+            // Top-right corner  
+            ctx.beginPath();
+            ctx.arc(centerX + 180, centerY - 100, cornerRadius, Math.PI / 2, Math.PI);
+            ctx.stroke();
+            // Bottom-left corner
+            ctx.beginPath();
+            ctx.arc(centerX - 180, centerY + 100, cornerRadius, -Math.PI / 2, 0);
+            ctx.stroke();
+            // Bottom-right corner
+            ctx.beginPath();
+            ctx.arc(centerX + 180, centerY + 100, cornerRadius, Math.PI, 3 * Math.PI / 2);
+            ctx.stroke();
+
+            // Midfield line
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 100);
+            ctx.lineTo(centerX, centerY + 100);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawTicketRings() {
+            // Clear and redraw field
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Add background gradient for entire canvas
+            const canvasGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(canvas.width, canvas.height));
+            canvasGradient.addColorStop(0, 'rgba(139, 92, 246, 0.05)');
+            canvasGradient.addColorStop(0.5, 'rgba(111, 66, 193, 0.03)');
+            canvasGradient.addColorStop(1, 'rgba(74, 44, 122, 0.08)');
+
+            ctx.fillStyle = canvasGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Stadium outer structure
+            const outerGradient = ctx.createRadialGradient(centerX, centerY, 200, centerX, centerY, 350);
+            outerGradient.addColorStop(0, 'rgba(108, 117, 125, 0.15)');
+            outerGradient.addColorStop(0.7, 'rgba(52, 58, 64, 0.25)');
+            outerGradient.addColorStop(1, 'rgba(33, 37, 41, 0.4)');
+
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, 320, 200, 0, 0, 2 * Math.PI);
+            ctx.fillStyle = outerGradient;
+            ctx.fill();
+
+            // Add stadium shadow
+            const shadowGradient = ctx.createRadialGradient(centerX, centerY + 10, 0, centerX, centerY + 10, 400);
+            shadowGradient.addColorStop(0, 'rgba(0, 0, 0, 0.1)');
+            shadowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 15, 350, 220, 0, 0, 2 * Math.PI);
+            ctx.fillStyle = shadowGradient;
+            ctx.fill();
+
+            drawStadiumField();
+
+            const vipTickets = tickets.filter(t => t.ticketType === 'VIP');
+            const stdTickets = tickets.filter(t => t.ticketType === 'Standard');
+
+            const drawRing = (ticketList, innerA, outerA, innerB, outerB, ringName) => {
+                // Group by area
+                const grouped = {};
+                ticketList.forEach(ticket => {
+                    const area = ticket.ticketArea;
+                    if (!grouped[area]) grouped[area] = [];
+                    grouped[area].push(ticket);
+                });
+
+                let currentAngle = 0;
+                const areasOrder = ['A', 'B', 'C', 'D', 'E', 'F'];
+                const totalAreas = areasOrder.length;
+                const anglePerArea = (2 * Math.PI) / totalAreas;
+
+                areasOrder.forEach((area, index) => {
+                    const ticketsInArea = grouped[area] || [];
+                    const startAngle = index * anglePerArea;
+                    const endAngle = startAngle + anglePerArea;
+
+                    // Gộp tất cả các vé cùng loại trong cùng một khu lại thành 1 sector lớn
+                    if (ticketsInArea.length > 0) {
+                        // Vẽ toàn bộ khu như một sector duy nhất
+                        const start = currentAngle;
+                        const end = start + anglePerArea;
+
+                        // Lấy ticket đầu tiên làm đại diện cho cả khu
+                        const representativeTicket = ticketsInArea[0];
+
+                        // Draw seat section
+                        ctx.beginPath();
+                        for (let angle = start; angle <= end; angle += 0.01) {
+                            const x = centerX + outerA * Math.cos(angle);
+                            const y = centerY + outerB * Math.sin(angle);
+                            if (angle === start) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                        }
+                        for (let angle = end; angle >= start; angle -= 0.01) {
+                            const x = centerX + innerA * Math.cos(angle);
+                            const y = centerY + innerB * Math.sin(angle);
+                            ctx.lineTo(x, y);
+                        }
+                        ctx.closePath();
+
+                        // Color based on area and type
+                        const baseColorKey = representativeTicket.ticketArea;
+                        const baseColor = baseColors[baseColorKey] || '#6c757d';
+
+                        // Create gradient for realistic seat appearance
+                        const sectionGradient = ctx.createRadialGradient(
+                            centerX + ((outerA + innerA) / 2) * Math.cos((start + end) / 2),
+                            centerY + ((outerB + innerB) / 2) * Math.sin((start + end) / 2),
+                            0,
+                            centerX + ((outerA + innerA) / 2) * Math.cos((start + end) / 2),
+                            centerY + ((outerB + innerB) / 2) * Math.sin((start + end) / 2),
+                            30
+                        );
+
+                        // Tạo màu thống nhất cho cùng một khu, chỉ khác độ sáng
+                        if (representativeTicket.ticketType === 'VIP') {
+                            // VIP: sáng hơn
+                            sectionGradient.addColorStop(0, shadeColor(baseColor, 1.3));
+                            sectionGradient.addColorStop(0.7, shadeColor(baseColor, 1.1));
+                            sectionGradient.addColorStop(1, baseColor);
+                        } else {
+                            // Standard: tối hơn
+                            sectionGradient.addColorStop(0, baseColor);
+                            sectionGradient.addColorStop(0.7, shadeColor(baseColor, 0.8));
+                            sectionGradient.addColorStop(1, shadeColor(baseColor, 0.6));
+                        }
+
+                        ctx.fillStyle = sectionGradient;
+                        ctx.fill();
+
+                        // Section border
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+
+                        // Area label
+                        const mid = (start + end) / 2;
+                        const labelX = centerX + ((outerA + innerA) / 2) * Math.cos(mid);
+                        const labelY = centerY + ((outerB + innerB) / 2) * Math.sin(mid);
+
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                        ctx.shadowBlur = 2;
+                        ctx.fillText(area, labelX, labelY - 5);
+                        ctx.fillText(representativeTicket.ticketType, labelX, labelY + 8);
+                        ctx.shadowBlur = 0;
+
+                        // Store position for click detection - áp dụng cho tất cả tickets trong khu
+                        ticketsInArea.forEach(ticket => {
+                            positionMap[ticket.ticketId] = {
+                                start, end, innerA, outerA, innerB, outerB, ticket
+                            };
+                        });
+
+                        currentAngle += anglePerArea;
+                    }
+                });
+            };
+
+            // Draw rings (VIP closer to field, Standard further out)
+            drawRing(vipTickets, 120, 170, 70, 100, 'VIP');
+            drawRing(stdTickets, 200, 260, 130, 160, 'Standard');
+
+            // Draw stadium infrastructure
+            drawStadiumInfrastructure();
+
+            // Draw stadium roof structure
+            ctx.strokeStyle = 'rgba(108, 117, 125, 0.4)';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 8; i++) {
+                const angle = (i * Math.PI) / 4;
+                ctx.beginPath();
+                ctx.moveTo(centerX + 280 * Math.cos(angle), centerY + 170 * Math.sin(angle));
+                ctx.lineTo(centerX + 320 * Math.cos(angle), centerY + 200 * Math.sin(angle));
+                ctx.stroke();
+            }
+
+            // Enhanced roof structure
+            ctx.strokeStyle = 'rgba(108, 117, 125, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, 330, 210, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // Roof supports
+            for (let i = 0; i < 16; i++) {
+                const angle = (i * Math.PI) / 8;
+                ctx.beginPath();
+                ctx.moveTo(centerX + 310 * Math.cos(angle), centerY + 190 * Math.sin(angle));
+                ctx.lineTo(centerX + 340 * Math.cos(angle), centerY + 220 * Math.sin(angle));
+                ctx.stroke();
+            }
+        }
+
+        // Click handler
+        canvas.addEventListener('click', function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const angle = (Math.atan2(dy, dx) + 2 * Math.PI) % (2 * Math.PI);
+
+            for (let ticketId in positionMap) {
+                const pos = positionMap[ticketId];
+                const xA = dx / pos.outerA;
+                const yB = dy / pos.outerB;
+                const r = Math.sqrt(xA * xA + yB * yB);
+
+                if (angle >= pos.start && angle <= pos.end &&
+                    r >= pos.innerA / pos.outerA && r <= 1) {
+                    showTicketModal(pos.ticket);
+                    break;
+                }
+            }
+        });
+
+        // Hover effect
+        canvas.addEventListener('mousemove', function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const angle = (Math.atan2(dy, dx) + 2 * Math.PI) % (2 * Math.PI);
+
+            let hovered = false;
+            for (let ticketId in positionMap) {
+                const pos = positionMap[ticketId];
+                const xA = dx / pos.outerA;
+                const yB = dy / pos.outerB;
+                const r = Math.sqrt(xA * xA + yB * yB);
+
+                if (angle >= pos.start && angle <= pos.end &&
+                    r >= pos.innerA / pos.outerA && r <= 1) {
+                    hovered = true;
+                    break;
+                }
+            }
+
+            canvas.style.cursor = hovered ? 'pointer' : 'default';
+        });
+
+        // Add animated effects
+        function addAnimatedEffects() {
+            // Animated background elements
+            const animationElements = [];
+
+            // Create floating particles around stadium
+            for (let i = 0; i < 15; i++) {
+                animationElements.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 1,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    opacity: Math.random() * 0.5 + 0.2
+                });
+            }
+
+            function animateParticles() {
+                // Save current state
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                // Draw particles
+                animationElements.forEach(particle => {
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size, 0, 2 * Math.PI);
+                    ctx.fillStyle = `rgba(139, 92, 246, ${particle.opacity})`;
+                    ctx.fill();
+
+                    // Update particle position
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+
+                    // Wrap around screen
+                    if (particle.x < 0) particle.x = canvas.width;
+                    if (particle.x > canvas.width) particle.x = 0;
+                    if (particle.y < 0) particle.y = canvas.height;
+                    if (particle.y > canvas.height) particle.y = 0;
+                });
+
+                // Restore after a short time
+                setTimeout(() => {
+                    ctx.putImageData(imageData, 0, 0);
+                }, 50);
+            }
+
+            // Run particle animation
+            setInterval(animateParticles, 100);
+        }
+
+        // Add pulsing effect to center field
+        function addPulsingEffect() {
+            let pulseSize = 0;
+            let pulseDirection = 1;
+
+            function pulse() {
+                // Save current canvas
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                // Add pulsing circle at center
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 35 + pulseSize, 0, 2 * Math.PI);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${0.3 - pulseSize * 0.02})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Update pulse size
+                pulseSize += pulseDirection * 0.5;
+                if (pulseSize > 10 || pulseSize < 0) {
+                    pulseDirection *= -1;
+                }
+
+                // Restore canvas after effect
+                setTimeout(() => {
+                    ctx.putImageData(imageData, 0, 0);
+                }, 100);
+
+                requestAnimationFrame(pulse);
+            }
+
+            // Start pulsing effect
+            // pulse(); // Uncommented to avoid too much animation
+        }
+
+        // Function to calculate and update ticket counts for each area
+        function updateAreaCounts() {
+            // Group tickets by area and type to avoid duplicates
+            const areaTypeMap = {};
+
+            tickets.forEach(ticket => {
+                const area = ticket.ticketArea;
+                const type = ticket.ticketType;
+                const amount = parseInt(ticket.ticketAmount) || 0;
+
+                // Create unique key for area + type combination
+                const key = `${area}_${type}`;
+
+                // Only keep the first occurrence or the one with highest amount
+                if (!areaTypeMap[key] || areaTypeMap[key] < amount) {
+                    areaTypeMap[key] = amount;
+                }
+            });
+
+            // Update display for each area separately
+            ['A', 'B', 'C', 'D', 'E', 'F'].forEach(area => {
+                const vipCount = areaTypeMap[`${area}_VIP`] || 0;
+                const stdCount = areaTypeMap[`${area}_Standard`] || 0;
+
+                // Update VIP count
+                const vipElement = document.getElementById(`vip-${area}`);
+                if (vipElement) {
+                    vipElement.textContent = `VIP: ${vipCount}`;
+
+                    // Color coding for VIP
+                    vipElement.classList.remove('high-stock', 'medium-stock', 'low-stock', 'no-stock');
+                    if (vipCount === 0) {
+                        vipElement.classList.add('no-stock');
+                    } else if (vipCount <= 2) {
+                        vipElement.classList.add('low-stock');
+                    } else if (vipCount <= 5) {
+                        vipElement.classList.add('medium-stock');
+                    } else {
+                        vipElement.classList.add('high-stock');
+                    }
+                }
+
+                // Update Standard count
+                const stdElement = document.getElementById(`std-${area}`);
+                if (stdElement) {
+                    stdElement.textContent = `Standard: ${stdCount}`;
+
+                    // Color coding for Standard
+                    stdElement.classList.remove('high-stock', 'medium-stock', 'low-stock', 'no-stock');
+                    if (stdCount === 0) {
+                        stdElement.classList.add('no-stock');
+                    } else if (stdCount <= 2) {
+                        stdElement.classList.add('low-stock');
+                    } else if (stdCount <= 5) {
+                        stdElement.classList.add('medium-stock');
+                    } else {
+                        stdElement.classList.add('high-stock');
+                    }
+                }
+            });
+        }
+
+        // Initialize stadium drawing
+        drawTicketRings();
+
+        // Update area counts
+        updateAreaCounts();
+
+        // Add subtle animations (commented out to avoid performance issues)
+        // addAnimatedEffects();
+        // addPulsingEffect();
+
+        // Legend click handlers
+        document.querySelectorAll('.legend-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const areaLetter = item.textContent.includes('Khu A') ? 'A' :
+                    item.textContent.includes('Khu B') ? 'B' :
+                        item.textContent.includes('Khu C') ? 'C' :
+                            item.textContent.includes('Khu D') ? 'D' :
+                                item.textContent.includes('Khu E') ? 'E' : 'F';
+
+                const ticket = tickets.find(t => t.ticketArea === areaLetter);
+                if (ticket) {
+                    showTicketModal(ticket);
+                }
+            });
+        });
+
+        function showTicketModal(ticket) {
+            // Populate modal with ticket information
+            document.getElementById('modalTicketTitle').textContent = ticket.ticketTitle || 'N/A';
+            document.getElementById('modalTicketType').innerHTML = `
+                <span class="badge ${ticket.ticketType === 'VIP' ? 'bg-warning text-dark' : 'bg-info'} me-2">
+                    ${ticket.ticketType}
+                </span>
+                ${ticket.ticketType === 'VIP' ? '<i class="fas fa-star text-warning"></i>' : ''}
+            `;
+            document.getElementById('modalTicketArea').innerHTML = `
+                <strong>Khu ${ticket.ticketArea}</strong>
+            `;
+            document.getElementById('modalTicketAmount').innerHTML = `
+                <span class="badge ${ticket.ticketAmount > 10 ? 'bg-success' : ticket.ticketAmount > 5 ? 'bg-warning' : 'bg-danger'}">
+                    ${ticket.ticketAmount} vé
+                </span>
+            `;
+            document.getElementById('modalTicketPrice').innerHTML = `
+                <strong class="text-success fs-5">${ticket.ticketPrice || 'Liên hệ'}</strong> VNĐ
+            `;
+            document.getElementById('modalTicketNote').textContent = ticket.ticketNote || 'Không có ghi chú đặc biệt';
+            document.getElementById('hiddenTicketId').value = ticket.ticketId;
+
+            // Benefits based on ticket type and area
+            const vipBenefits = [
+                "<i class='fas fa-crown text-warning me-2'></i>Lối vào khu vực VIP riêng biệt",
+                "<i class='fas fa-utensils text-success me-2'></i>Buffet cao cấp và đồ uống miễn phí",
+                "<i class='fas fa-chair text-info me-2'></i>Ghế ngồi da thật cao cấp có tựa lưng",
+                "<i class='fas fa-car text-primary me-2'></i>Bãi đỗ xe riêng và dịch vụ đưa đón",
+                "<i class='fas fa-wifi text-secondary me-2'></i>WiFi tốc độ cao miễn phí",
+                "<i class='fas fa-concierge-bell text-warning me-2'></i>Dịch vụ hỗ trợ cá nhân 24/7"
+            ];
+
+            const standardBenefits = [
+                "<i class='fas fa-door-open text-primary me-2'></i>Lối vào tiêu chuẩn, không xếp hàng lâu",
+                "<i class='fas fa-shopping-cart text-success me-2'></i>Được mua đồ ăn và nước uống tại quầy",
+                "<i class='fas fa-restroom text-info me-2'></i>Sử dụng các tiện ích cơ bản của sân vận động",
+                "<i class='fas fa-camera text-secondary me-2'></i>Được chụp ảnh lưu niệm (không flash)"
+            ];
+
+            // Area-specific benefits
+            const areaBenefits = {
+                'A': ["<i class='fas fa-eye text-primary me-2'></i>Tầm nhìn tuyệt vời nhất, gần sân nhất"],
+                'B': ["<i class='fas fa-binoculars text-info me-2'></i>Góc nhìn rộng, quan sát toàn bộ sân"],
+                'C': ["<i class='fas fa-users text-success me-2'></i>Khu vực gia đình, an toàn và thoải mái"],
+                'D': ["<i class='fas fa-heart text-danger me-2'></i>Không khí sôi động, gần khu cổ động viên"],
+                'E': ["<i class='fas fa-baby text-pink me-2'></i>Khu vực gia đình, phù hợp mang trẻ em"],
+                'F': ["<i class='fas fa-graduation-cap text-info me-2'></i>Giá ưu đãi cho học sinh, sinh viên"]
+            };
+
+            const benefitsList = document.getElementById('benefitsList');
+            benefitsList.innerHTML = '';
+
+            const benefits = ticket.ticketType === 'VIP' ? vipBenefits : standardBenefits;
+            const specificBenefits = areaBenefits[ticket.ticketArea] || [];
+
+            [...benefits, ...specificBenefits].forEach(benefit => {
+                const li = document.createElement('li');
+                li.innerHTML = benefit;
+                li.className = 'mb-2';
+                benefitsList.appendChild(li);
+            });
+
+            // Show modal with animation
+            const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+            modal.show();
+
+            // Add entrance animation to modal
+            setTimeout(() => {
+                document.querySelector('.modal-content').style.transform = 'scale(1)';
+                document.querySelector('.modal-content').style.opacity = '1';
+            }, 100);
+            const submitButton = document.querySelector('.modal-footer button[type="submit"]');
+            if (ticket.ticketAmount > 0) {
+                submitButton.style.display = 'inline-block';
+            } else {
+                submitButton.style.display = 'none';
+            }
+        }
+
+        // Add some interactive animations
+        document.querySelectorAll('.legend-item').forEach(item => {
+            item.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateX(8px) scale(1.02)';
+            });
+
+            item.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+
+        // Loading animation for canvas
+        function showLoadingAnimation() {
+            ctx.fillStyle = 'rgba(111, 66, 193, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#6f42c1';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Đang tải sơ đồ sân vận động...', centerX, centerY);
+        }
+
+        // Simulate loading
+        showLoadingAnimation();
+        setTimeout(() => {
+            drawTicketRings();
+        }, 1000);
+
+        // Add resize handler for responsive design
+        function handleResize() {
+            const container = document.querySelector('.stadium-container');
+            const containerWidth = container.offsetWidth - 40; // padding
+
+            if (window.innerWidth < 768) {
+                canvas.style.width = '100%';
+                canvas.style.height = 'auto';
+                canvas.style.maxWidth = `${containerWidth}px`;
+            } else {
+                canvas.style.width = '';
+                canvas.style.height = '';
+                canvas.style.maxWidth = '';
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Call on load
+    </script>
+
+    <div th:replace="fragments/footer :: siteFooter"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

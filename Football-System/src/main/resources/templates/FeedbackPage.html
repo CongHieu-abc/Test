@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gửi Feedback</title>
+
+    <!-- Inline JS for submitting feedback -->
+    <script>
+        function submitFeedback(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            if (!message.trim()) {
+                alert('Vui lòng nhập nội dung phản hồi.');
+                return;
+            }
+
+            fetch('/feedback/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ name, email, message })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById("successMessage").classList.remove("hidden");
+                        document.getElementById("feedbackForm").reset();
+                    } else {
+                        alert("Có lỗi xảy ra khi gửi phản hồi.");
+                    }
+                });
+        }
+    </script>
+
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#0f0f0f] min-h-screen">
+    <!-- Wrapper để giữ footer luôn ở cuối -->
+    <div class="min-h-screen flex flex-col">
+
+        <!-- Header -->
+        <div th:replace="fragments/header :: siteHeader"></div>
+
+        <!-- Hero Section -->
+        <div class="w-full bg-gradient-to-b from-[#00ff87]/10 to-black/90 text-center py-20">
+            <h1 class="text-[#00ff87] text-4xl font-bold mb-2 uppercase tracking-wider">Gửi Phản Hồi</h1>
+            <p class="text-gray-400 text-lg">Chúng tôi luôn lắng nghe ý kiến của bạn</p>
+        </div>
+
+        <!-- Nội dung chính -->
+        <main class="flex-1 flex items-center justify-center px-4 -mt-10">
+            <div class="bg-[#1a1a1a] p-8 rounded-xl border border-[#00ff87]/20 shadow-lg shadow-[#00ff87]/10 w-full max-w-lg my-10">
+                <div id="successMessage"
+                    class="mb-5 hidden text-center text-[#00ff87] font-medium p-3 bg-[#00ff87]/10 rounded-md border border-[#00ff87]/20">
+                    Cảm ơn bạn đã gửi phản hồi! Chúng tôi sẽ xem xét và phản hồi bạn sớm nhất.
+                </div>
+
+                <form id="feedbackForm" onsubmit="submitFeedback(event)">
+                    <!-- Tên -->
+                    <div class="mb-5">
+                        <label for="name" class="block mb-2 text-sm font-semibold text-[#00ff87]">Tên</label>
+                        <input type="text" id="name"
+                            class="w-full bg-black/30 border border-[#00ff87]/20 rounded-lg px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-[#00ff87] focus:ring-1 focus:ring-[#00ff87] transition duration-200"
+                            placeholder="Tên của bạn (không bắt buộc)">
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-5">
+                        <label for="email" class="block mb-2 text-sm font-semibold text-[#00ff87]">Email</label>
+                        <input type="email" id="email"
+                            class="w-full bg-black/30 border border-[#00ff87]/20 rounded-lg px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-[#00ff87] focus:ring-1 focus:ring-[#00ff87] transition duration-200"
+                            placeholder="Email (không bắt buộc)">
+                    </div>
+
+                    <!-- Nội dung -->
+                    <div class="mb-6">
+                        <label for="message" class="block mb-2 text-sm font-semibold text-[#00ff87]">Nội dung phản hồi
+                            *</label>
+                        <textarea id="message" required rows="5"
+                            class="w-full bg-black/30 border border-[#00ff87]/20 rounded-lg px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-[#00ff87] focus:ring-1 focus:ring-[#00ff87] transition duration-200"
+                            placeholder="Nội dung bạn muốn góp ý..."></textarea>
+                    </div>
+
+                    <!-- Nút gửi -->
+                    <button type="submit"
+                        class="w-full bg-[#00ff87] text-black font-bold py-3 rounded-lg hover:bg-[#00ff87]/90 focus:outline-none focus:ring-2 focus:ring-[#00ff87] focus:ring-offset-2 focus:ring-offset-[#1a1a1a] transform hover:scale-[1.02] transition-all duration-200">
+                        Gửi Phản Hồi</button>
+                </form>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <div th:replace="fragments/footer :: siteFooter"></div>
+    </div>
+    <!-- Import Bootstrap JS để dropdown hoạt động -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuperLeague Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/images/banner.png') no-repeat center center;
+            background-size: cover;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-banner h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-banner p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        /* Category Navigation */
+        .category-nav {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            margin-bottom: 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .category-btn {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 12px 24px;
+            margin: 0 8px 8px 0;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(55, 0, 60, 0.3);
+        }
+
+        .category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(55, 0, 60, 0.4);
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+        }
+
+        /* Section Titles */
+        .section-title {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin: 50px 0 30px;
+            box-shadow: 0 8px 25px rgba(55, 0, 60, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .section-title:hover::before {
+            left: 100%;
+        }
+
+        .section-title h3 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Product Cards */
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: none;
+            transition: all 0.4s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(55, 0, 60, 0.15);
+        }
+
+        .product-img {
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            transition: transform 0.4s ease;
+            border-radius: 10px;
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #37003c;
+            min-height: 50px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #37003c;
+            margin-bottom: 20px;
+        }
+
+        .add-to-cart-btn {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(55, 0, 60, 0.3);
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(55, 0, 60, 0.4);
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+        }
+
+        /* Apparel Section */
+        .apparel-card {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .apparel-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .apparel-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .apparel-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .apparel-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            color: white;
+            padding: 20px;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .apparel-card:hover .apparel-overlay {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Cart Overlay */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 450px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            z-index: 1050;
+            transform: translateX(100%);
+            transition: transform 0.4s ease;
+            overflow-y: auto;
+        }
+
+        .cart-overlay .btn-primary {
+            width: 200px !important;
+            /* Set the button width to 200px */
+            padding: 10px 20px;
+            /* Adjust the padding */
+            border-radius: 20px;
+            /* Round the corners */
+            font-weight: 500;
+            /* Font weight */
+            background-color: #b19cd9 !important;
+            /* Light purple background */
+            color: white;
+            /* White text */
+            text-align: center;
+            /* Center the text */
+            border: none;
+            /* Remove the border */
+            display: block;
+            /* Make the button a block-level element */
+            margin: 0 auto;
+            /* Center the button horizontally */
+        }
+
+        .cart-overlay .btn-primary:hover {
+            background-color: #00ff87 !important;
+            /* Slightly darker shade for hover effect */
+        }
+
+
+        .cart-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 6px 20px rgba(55, 0, 60, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .cart-toggle-btn:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 8px 25px rgba(55, 0, 60, 0.5);
+        }
+
+        /* Footer */
+        .footer-links {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 80px;
+        }
+
+        .footer-links h6 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .partner-logos img {
+            max-height: 40px;
+            margin: 10px 15px;
+            transition: transform 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .partner-logos img:hover {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-banner h1 {
+                font-size: 2.5rem;
+            }
+
+            .cart-overlay {
+                width: 100%;
+            }
+
+            .category-nav {
+                padding: 15px 0;
+            }
+
+            .section-title {
+                margin: 30px 0 20px;
+                padding: 15px 20px;
+            }
+
+            .product-card {
+                padding: 20px;
+            }
+
+            .apparel-card img {
+                height: 250px;
+            }
+        }
+
+        /* Container improvements */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Quantity controls */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-control a {
+            background: #37003c;
+            color: white;
+            text-decoration: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .quantity-control a:hover {
+            background: #5a1a5a;
+            transform: scale(1.1);
+        }
+
+        .btn-primary {
+            width: 200px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 500;
+            background-color: #6d1e7f;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #500061;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="fragments/header :: siteHeader"></div>
+    <div th:replace="fragments/chatbox :: chatBoxFragment"></div>
+    <!-- Cart Toggle Button -->
+    <button id="cartToggleBtn" class="cart-toggle-btn" th:onclick="toggleCart()">
+        🛒
+    </button>
+
+    <!-- Cart Overlay -->
+    <div class="cart-overlay" id="cartOverlay">
+        <div class="p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0 fw-bold">Giỏ Hàng Của Bạn</h5>
+                <button class="btn-close" th:onclick="closeCart()"></button>
+            </div>
+
+            <div th:if="${#lists.isEmpty(cartProducts)}" class="text-center py-5">
+                <div class="mb-3" style="font-size: 3rem;">🛒</div>
+                <p class="text-muted">Giỏ hàng của bạn đang trống</p>
+                <button class="btn btn-outline-primary" th:onclick="closeCart()">Tiếp Tục Mua Sắm</button>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(cartProducts)}">
+                <div class="mb-3 border-bottom pb-3" th:each="item : ${cartProducts}">
+                    <div class="d-flex align-items-center gap-3">
+                        <img th:src="@{${item.value.product.productImgPath}}" class="img-fluid rounded"
+                            style="width:80px;height:80px;object-fit:cover;" />
+                        <div class="flex-grow-1">
+                            <h6 th:text="${item.value.product.productName}" class="mb-1">Product Name</h6>
+                            <p class="text-muted mb-2"
+                                th:text="(${item.value.product.productPrice} * ${item.value.productAmount}) + 'đ'">0.00đ
+                            </p>
+                            <div class="quantity-control">
+                                <a th:href="@{'/product/dp'(productId=${item.key}, showCart='true')}">-</a>
+                                <span th:text="${item.value.productAmount}" class="fw-bold">1</span>
+                                <a th:href="@{'/product/ip'(productId=${item.key}, showCart='true')}">+</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2">
+                    <a class="btn btn-primary btn-lg" th:href="@{/payment/checkout}">Thanh Toán</a>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <h6 class="fw-bold mb-3">Danh Mục Phổ Biến</h6>
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <button class="btn btn-outline-secondary btn-sm">Bóng Đá</button>
+                <button class="btn btn-outline-secondary btn-sm">Áo SuperLeague</button>
+                <button class="btn btn-outline-secondary btn-sm">Phụ Kiện</button>
+            </div>
+
+            <h6 class="fw-bold mb-3">Sản Phẩm Nổi Bật</h6>
+            <div class="d-flex overflow-auto gap-3" th:if="${popularProducts}">
+                <div style="min-width: 120px;" th:each="p : ${popularProducts}">
+                    <img th:src="@{${p.productImgPath}}" class="img-fluid rounded mb-2"
+                        style="height: 100px; object-fit: cover;" />
+                    <small th:text="${p.productName}">Product Name</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div class="hero-content">
+            <h1>SuperLeague Official Store</h1>
+            <p>Cửa hàng chính thức với các sản phẩm cao cấp từ SuperLeague</p>
+        </div>
+    </div>
+
+    <!-- Category Navigation -->
+    <div class="category-nav">
+        <div class="main-container">
+            <div class="text-center">
+                <button class="category-btn" data-filter="ALL">Tất Cả Sản Phẩm</button>
+                <button class="category-btn" data-filter="BONGDA">Bóng Đá</button>
+                <button class="category-btn" data-filter="AO">Áo Thun</button>
+                <button class="category-btn" data-filter="AO">Hoodie & Áo</button>
+                <button class="category-btn" data-filter="QUAN">Quần & Shorts</button>
+                <button class="category-btn" data-filter="PHUKIEN">Phụ Kiện</button>
+                <button class="category-btn" data-filter="CLB">Câu Lạc Bộ</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- New Releases -->
+        <div class="section-title fade-in">
+            <h3>Sản Phẩm Mới Nhất</h3>
+        </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="col fade-in" th:each="p : ${products}" style="animation-delay: 0.1s;"
+                th:attr="data-category=${p.categoryProduct}">
+                <div class="product-card h-100">
+                    <a th:href="@{'/product/' + ${p.productId}}" class="text-decoration-none text-dark d-block">
+                        <img th:src="@{${p.productImgPath}}" alt="Product Image" class="img-fluid product-img" />
+                        <div class="product-title" th:text="${p.productName}">SuperLeague Item</div>
+                        <div class="product-desc">Chất lượng cao cấp</div>
+                        <div class="product-price" th:text="${p.productPrice} + 'đ'">250,000đ</div>
+                    </a>
+                    <button class="add-to-cart-btn" th:data-id="${p.productId}"
+                        th:onclick="addToCart(this.getAttribute('data-id'))" type="button">
+                        Thêm Vào Giỏ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Apparel Section -->
+        <div class="section-title mt-5 fade-in">
+            <h3>Trang Phục Thể Thao</h3>
+        </div>
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <div class="apparel-card">
+                    <img src="/images/apparel/tshirt.png" alt="T-shirt" />
+                    <div class="apparel-overlay">
+                        <h6 class="fw-bold">Áo Thun</h6>
+                        <p class="mb-0">Bộ sưu tập áo thun chính thức</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="apparel-card">
+                    <img src="/images/apparel/hoodie.png" alt="Hoodies" />
+                    <div class="apparel-overlay">
+                        <h6 class="fw-bold">Hoodie & Áo</h6>
+                        <p class="mb-0">Thời trang thể thao cao cấp</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="apparel-card">
+                    <img src="/images/apparel/pants.png" alt="Pants" />
+                    <div class="apparel-overlay">
+                        <h6 class="fw-bold">Quần & Shorts</h6>
+                        <p class="mb-0">Thoải mái trong mọi hoạt động</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="apparel-card">
+                    <img src="/images/apparel/accessories.png" alt="Accessories" />
+                    <div class="apparel-overlay">
+                        <h6 class="fw-bold">Phụ Kiện</h6>
+                        <p class="mb-0">Hoàn thiện phong cách của bạn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-links">
+        <div class="main-container">
+            <div class="row text-center text-md-start">
+                <div class="col-md-3 mb-4">
+                    <h6>Cửa Hàng</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Bóng Đá</a></li>
+                        <li class="mb-2"><a href="#">Áo Thun</a></li>
+                        <li class="mb-2"><a href="#">Hoodies</a></li>
+                        <li class="mb-2"><a href="#">Phụ Kiện</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6>Hỗ Trợ</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Theo Dõi Đơn Hàng</a></li>
+                        <li class="mb-2"><a href="#">Vận Chuyển</a></li>
+                        <li class="mb-2"><a href="#">Đổi Trả</a></li>
+                        <li class="mb-2"><a href="#">Liên Hệ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6>SuperLeague</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Giải Đấu</a></li>
+                        <li class="mb-2"><a href="#">Thống Kê</a></li>
+                        <li class="mb-2"><a href="#">Tin Tức</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6>Đối Tác</h6>
+                    <div class="partner-logos text-center text-md-start">
+                        <img src="/images/logos/barclays.png" alt="Barclays" />
+                        <img src="/images/logos/coke.png" alt="CocaCola" />
+                        <img src="/images/logos/puma.png" alt="Puma" />
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.3);">
+            <div class="text-center">
+                <p class="mb-0 opacity-75">&copy; 2025 SuperLeague Official Store. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        const currentURL = encodeURIComponent(window.location.href);
+
+        function addToCart(productId) {
+            fetch(`/cart?productId=${productId}&productAmount=1&url=${currentURL}&size=${null}`, {
+                method: 'POST'
+            }).then(() => {
+                // Show success message
+                const btn = document.querySelector(`[data-id="${productId}"]`);
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✓ Đã Thêm';
+                btn.style.background = '#28a745';
+
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                    window.location.reload();
+                }, 1500);
+
+            }).catch(err => {
+                console.error('Error:', err);
+                alert('Không thể thêm vào giỏ hàng');
+            });
+        }
+
+        function toggleCart() {
+            const cart = document.getElementById('cartOverlay');
+            const toggleBtn = document.getElementById('cartToggleBtn');
+
+            if (cart.style.transform === 'translateX(0%)') {
+                cart.style.transform = 'translateX(100%)';
+                toggleBtn.classList.remove('d-none');
+            } else {
+                cart.style.transform = 'translateX(0%)';
+                toggleBtn.classList.add('d-none');
+            }
+        }
+
+        function closeCart() {
+            document.getElementById('cartOverlay').style.transform = 'translateX(100%)';
+            document.getElementById('cartToggleBtn').classList.remove('d-none');
+        }
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all product cards
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            const productCards = document.querySelectorAll('.col.fade-in');
+
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const selectedCategory = button.getAttribute('data-filter');
+
+                    productCards.forEach(card => {
+                        const productCategory = card.getAttribute('data-category');
+
+                        if (selectedCategory === 'ALL' || productCategory === selectedCategory) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+                    // Optional: Scroll to product section
+                    document.querySelector('.section-title h3')?.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        });
+
+
+    </script>
+</body>
+
+</html>

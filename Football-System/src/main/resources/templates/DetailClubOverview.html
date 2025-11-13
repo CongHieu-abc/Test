@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Club Overview</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .club-header {
+      background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+      color: white;
+      padding: 3rem 1rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .club-header img {
+      height: 80px;
+      margin-bottom: 1rem;
+    }
+
+    .card-news,
+    .card-kit,
+    .card-video,
+    .card-stat {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      transition: transform 0.3s ease;
+      background-color: #fff;
+    }
+
+    .card-news:hover,
+    .card-kit:hover,
+    .card-video:hover,
+    .card-stat:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-news img,
+    .card-kit img {
+      border-radius: 8px;
+    }
+
+    h5 {
+      border-left: 4px solid #00ff87;
+      padding-left: 12px;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .card-stat img {
+      height: 64px;
+      width: 64px;
+      object-fit: cover;
+      border: 2px solid #00ff87;
+    }
+
+    .card-video iframe {
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .card-video .p-2 {
+      font-size: 0.95rem;
+      font-weight: 500;
+      background-color: #f1f1f1;
+      border-top: 1px solid #ddd;
+    }
+  </style>
+</head>
+
+<body>
+  <div th:replace="fragments/header :: siteHeader"></div>
+  <div th:replace="fragments/chatbox :: chatBoxFragment"></div>
+  <div class="club-header"th:style="'background: linear-gradient(to right, ' + ${club.clubPrimaryColor} + ', ' + ${club.clubSecondaryColor} + ');'">
+    <img th:src="@{${club.clubLogoPath}}" alt="Logo" style="width: 80px; height: 80px; object-fit: contain;" />
+
+    <h1 class="mb-1" th:text="${club.clubName}">Club Name</h1>
+    <p class="mb-0">
+      <span th:text="${club.clubFounded}">1878</span> •
+      <span th:text="${club.clubStadium}">Rach Tray</span>
+    </p>
+    <form th:if="${!subscribed}" th:action="@{/subscriber/subscribe}" method="post">
+      <input type="hidden" name="clubId" th:value="${club.clubId}" />
+      <button type="submit" class="btn btn-outline-light btn-sm mt-3">
+        Đăng ký theo dõi CLB
+      </button>
+    </form>
+    <div class="container">
+      <div th:if="${subscribed}" class="alert alert-success mt-4" role="alert">
+        Bạn đã đăng ký theo dõi CLB thành công!
+      </div>
+    </div>
+  </div>
+
+
+  <div class="container mt-4">
+    <ul class="nav nav-tabs">
+      <li class="nav-item"><a class="nav-link active" th:href="'/club/' + ${club.clubId}">Overview</a></li>
+      <li class="nav-item"><a class="nav-link" th:href="'/club/' + ${club.clubId} + '/squad'">Squad</a></li>
+      <li class="nav-item"><a class="nav-link" th:href="'/club/' + ${club.clubId} + '/fixtures'">Fixtures</a></li>
+      <li class="nav-item"><a class="nav-link" th:href="'/club/' + ${club.clubId} + '/results'">Results</a></li>
+      <li class="nav-item"><a class="nav-link" th:href="'/club/' + ${club.clubId} + '/stadium'">Stadium</a></li>
+    </ul>
+  </div>
+
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="mb-4">
+          <h5>Latest Club News</h5>
+          <div class="row row-cols-1 row-cols-md-2 g-3">
+            <div class="col" th:each="blog : ${blogs}">
+              <div class="card-news p-3 text-center h-100 d-flex flex-column">
+                <img th:src="${blog.blogThumnailPath}" class="img-fluid mb-3" style="height: 200px; object-fit: cover; border-radius: 8px;" />
+                <div class="flex-grow-1 mb-3">
+                  <h6 class="fw-bold" th:text="${blog.blogTitle}" style="font-size: 0.95rem; line-height: 1.3; min-height: 2.6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Kleberson's message for fans</h6>
+                </div>
+                <a th:href="@{'/news/' + ${blog.blogId}}" class="btn btn-sm btn-outline-primary mt-auto">Read more</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h5>2024/25 Kits</h5>
+          <div class="row row-cols-1 row-cols-md-3 g-3">
+            <div class="col">
+              <div class="card-kit p-2 text-center">
+                <img th:src="${club.clubHomeKit}" class="img-fluid mb-2" />
+                <div>Home Kit</div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card-kit p-2 text-center">
+                <img th:src="${club.clubAwayKit}" class="img-fluid mb-2" />
+                <div>Away Kit</div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card-kit p-2 text-center">
+                <img th:src="${club.clubThirdKit}" class="img-fluid mb-2" />
+                <div>Third Kit</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h5>Videos</h5>
+          <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="col" th:each="highlight : ${highlights}">
+              <div class="card-video">
+                <iframe class="w-100" height="200" th:src="'https://www.youtube.com/embed/' + ${highlight.vidUrl}"
+                  frameborder="0" allowfullscreen>
+                </iframe>
+                <div class="p-2" th:text="${highlight.matchEventTitle}">Video title</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="mb-4">
+          <h5>Season Stats</h5>
+          <form method="get" th:action="@{'/club/' + ${club.clubId}}">
+            <div class="row g-2 align-items-center mb-3">
+              <div class="col-auto">
+                <label for="seasonSelect" class="form-label fw-semibold mb-0">Choose Season:</label>
+              </div>
+              <div class="col-auto">
+                <select name="season" id="seasonSelect" class="form-select" onchange="this.form.submit()">
+                  <option th:each="s : ${seasons}" th:value="${s}" th:text="${s}"
+                    th:selected="${s.toString() == selectedSeason}"></option>
+                </select>
+              </div>
+            </div>
+          </form>
+
+          <div class="mb-4">
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="card-stat p-3 text-center">
+                  <div class="fw-bold">Goals</div>
+                  <img src="/images/ball.png" class="rounded-circle my-2" style="width: 64px; height: 64px;"
+                    alt="Goals Icon">
+                  <div class="fw-bold fs-5 text-danger"
+                    th:text="${stats != null && stats.allGoals != null ? stats.allGoals : 0}">0</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="card-stat p-3 text-center">
+                  <div class="fw-bold">Assists</div>
+                  <img src="/images/assist.png" class="rounded-circle my-2" style="width: 64px; height: 64px;"
+                    alt="Assist Icon">
+                  <div class="fw-bold fs-5 text-primary"
+                    th:text="${stats != null && stats.allAssists != null ? stats.allAssists : 0}">0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h5>All-time Stats</h5>
+          <div class="mb-4">
+
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="card-stat p-3 text-center">
+                  <div class="fw-bold">Appearances</div>
+                  <img th:src="${topAppeared.playerImgPath}" class="rounded-circle my-2">
+                  <div th:text="${topAppeared.playerFullName}">Ryan Giggs</div>
+                  <div th:text="${topAppeared.totalAppeared} + ' Appearances'" class="fw-bold">632</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="card-stat p-3 text-center">
+                  <div class="fw-bold">Goals</div>
+                  <img th:src="${topScorer.playerImgPath}" class="rounded-circle my-2">
+                  <div th:text="${topScorer.playerFullName}">Ryan Giggs</div>
+                  <div th:text="${topScorer.totalGoals} + ' Goals'" class="fw-bold">632</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="subscribeModal" tabindex="-1" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form th:action="@{/subscriber/subscribe}" method="post">
+            <div class="modal-header">
+              <h5 class="modal-title" id="subscribeModalLabel">Theo dõi CLB</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" name="clubId" th:value="${club.clubId}" />
+              <div class="mb-3">
+                <label for="email" class="form-label">Nhập email của bạn:</label>
+                <input type="email" class="form-control" name="email" id="email" placeholder="you@example.com"
+                  required />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Đăng ký</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

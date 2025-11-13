@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Match Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom right, #0f0f0f, #1a1a1a);
+            /* Dark gradient background */
+            color: #f5f5f5 !important;
+            /* Light text for readability */
+            overflow-x: hidden;
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        .slide-up {
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.8s ease forwards;
+        }
+
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .scoreboard {
+            background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+            /* Green to black gradient */
+            color: white;
+            padding: 40px 20px;
+            border-radius: 16px;
+            margin: 40px auto;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .scoreboard img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            background-color: white;
+        }
+
+        .scoreboard .score {
+            font-size: 3.2rem;
+            font-weight: bold;
+        }
+
+
+        /* Phần style chuyên nghiệp cho các section chính */
+        .section {
+            background-color: #2a2a2a !important;
+            /* Darker section background */
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-radius: 0.8rem;
+            box-shadow: 0 4px 15px rgb(0 0 0 / 0.05);
+        }
+
+        .section h4 {
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid #00ff87;
+            /* Green underline */
+            padding-bottom: 0.3rem;
+            color: #00ff87;
+            /* Green text */
+        }
+
+        /* Style cho box highlight Man of the Match */
+        .highlight-box {
+            background-color: #2d2d2d;
+            /* Darker background for highlight */
+            border: 2px solid #00ff87;
+            /* Green border */
+        }
+
+        /* Nút button nhỏ với hiệu ứng hover */
+        button.btn-sm {
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        button.btn-sm:hover {
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Bình luận trận đấu */
+        .section .d-flex p {
+            color: #555;
+        }
+
+        /* Ảnh cầu thủ Man of the Match */
+        .highlight-box img {
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+        }
+
+        /* Nav-tabs style cải tiến */
+        .nav-tabs {
+            border-bottom: 3px solid #e9ecef;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 12px 20px;
+            color: #666;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            background: none;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            background-color: rgba(48, 0, 58, 0.1);
+            color: #30003a;
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #30003a;
+            color: #fff;
+            font-weight: 700;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 3px solid #30003a;
+            box-shadow: 0 4px 12px rgba(48, 0, 58, 0.3);
+        }
+
+        /* Nav-pills style cải tiến */
+        .nav-pills .nav-link {
+            font-weight: 600;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            border: 2px solid #e9ecef;
+            color: #666;
+        }
+
+        .nav-pills .nav-link:hover {
+            background-color: rgba(48, 0, 58, 0.1);
+            border-color: #30003a;
+            color: #30003a;
+            transform: scale(1.05);
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #30003a;
+            border-color: #30003a;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(48, 0, 58, 0.3);
+        }
+
+        .section {
+            background-color: white;
+            padding: 30px;
+            margin-top: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+        }
+
+        .highlight-box {
+            background: #ffe0f0;
+            border-left: 6px solid #c2185b;
+            animation: fadeIn 1.2s ease forwards;
+        }
+
+        .event {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            opacity: 0;
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        .event-icon {
+            width: 32px;
+            margin-right: 12px;
+        }
+
+        .timeline-chart {
+            position: relative;
+        }
+
+        .timeline-line {
+            height: 4px;
+            background-color: #00ff87;
+            /* Green timeline line */
+            position: relative;
+            margin: 30px 0 40px;
+            border-radius: 2px;
+        }
+
+        .timeline-point {
+            position: absolute;
+            top: -30px;
+            text-align: center;
+            transform: translateX(-50%);
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .timeline-point img {
+            display: block;
+            margin: 0 auto 5px;
+            width: 32px;
+            height: 32px;
+        }
+
+        .timeline-point span {
+            font-size: 13px;
+            color: #00ff87;
+            /* Green text for event minutes */
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #30003a;
+        }
+
+        .formation-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+
+        .formation-row {
+            display: flex;
+            justify-content: center;
+            /* Luôn căn giữa các cầu thủ */
+            gap: 10px;
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        /* Áp dụng cho tất cả cầu thủ */
+        .player {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: 220px;
+            /* Giới hạn tối đa cho box */
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            color: #00ff87 !important;
+        }
+
+        .player:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            background-color: rgba(0, 255, 135, 0.1);
+            /* Light green hover effect */
+        }
+
+        /* Nếu chỉ có 1 cầu thủ, không cần flex:1 để không giãn đầy ra */
+        .formation-row:has(.player:only-child) .player {
+            flex: 0 1 220px;
+            /* Hoặc dùng width: 220px; */
+            margin: 0 auto;
+            /* Cân giữa tuyệt đối */
+        }
+
+        .player img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            margin-right: 8px;
+            object-fit: cover;
+            border: 1px solid #aaa;
+        }
+
+        .player .info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .player small {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .stat-row {
+            margin: 10px 0;
+            font-size: 15px;
+        }
+
+        /* Team title cải tiến */
+        .team-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(48, 0, 58, 0.1), rgba(95, 0, 105, 0.1));
+            border-left: 5px solid #00ff87;
+            /* Green border */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .team-title.text-primary {
+            border-left-color: #0d6efd;
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.05));
+        }
+
+        .team-title.text-danger {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+        }
+
+        .substitutes {
+            display: flex;
+            /* Bật flex để flex-wrap và justify-content hoạt động */
+            flex-wrap: wrap;
+            /* Cho phép cầu thủ dự bị xuống dòng khi cần */
+            justify-content: center;
+            /* Căn giữa các ô cầu thủ */
+            gap: 15px;
+            /* Tăng khoảng cách ngang và dọc giữa các cầu thủ */
+            margin-top: 20px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        .substitutes .player {
+            background-color: #fff9e6;
+            /* Vàng nhạt */
+            border: 1px solid #ffd966;
+            flex: 0 1 140px;
+            /* Giới hạn tối đa và cho phép co dãn ngang */
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .substitutes .player {
+            background-color: #2d2d2d;
+            /* Dark background for substitutes */
+            border: 1px solid #00ff87;
+            /* Green border */
+        }
+
+        /* Subtitle cho dự bị */
+        .substitutes-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px dashed #ffd966;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            transition: all 0.3s ease;
+            color: #00ff87 !important;
+        }
+
+        .stat-item:hover {
+            background-color: rgba(0, 255, 135, 0.1);
+            /* Green highlight on hover */
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .grass-field {
+            background-image: url('/images/grass-texture.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: inset 0 0 0 3px rgba(48, 0, 58, 0.2);
+            background-color: #2d5a2d;
+        }
+
+        /* Hiệu ứng loading cho tab content */
+        .tab-pane {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .tab-pane.show.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Icon cho các tab */
+        .nav-tabs .nav-link::before {
+            font-family: 'bootstrap-icons';
+            margin-right: 8px;
+        }
+
+        .nav-tabs #home-tab::before {
+            content: "\f4a4";
+            /* house-fill */
+        }
+
+        .nav-tabs #away-tab::before {
+            content: "\f53f";
+            /* airplane */
+        }
+
+        /* Badge cho số áo */
+        .player-number {
+            background: #30003a;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="fragments/header :: siteHeader"></div>
+
+    <div class="container">
+        <!-- Nút hành động cập nhật trận đấu -->
+        <div class="d-flex flex-wrap justify-content-center justify-content-md-end gap-2 mb-4" th:if="${isAdmin}">
+            <button class="btn btn-warning btn-sm" th:data-id="${match.matchId}" th:data-title="${match.matchTitle}"
+                th:data-start="${match.matchStartTime}"
+                th:data-description="${match.matchDescription != null ? match.matchDescription : 'Không có mô tả'}"
+                th:data-link="${match.matchLinkLivestream != null ? match.matchLinkLivestream : ''}"
+                th:data-referenceinfor="${match.matchReferenceInformation != null ? match.matchReferenceInformation : ''}"
+                onclick="openEditMatchModal(this)">
+                <i class="bi bi-pencil me-1"></i>
+                Chỉnh sửa trận đấu
+            </button>
+            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#uploadLineupModal">
+                <i class="bi bi-upload me-1"></i>
+                Upload Lineup
+            </button>
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addHighlightModal">
+                <i class="bi bi-plus-circle me-1"></i>
+                Thêm highlight
+            </button>
+        </div>
+
+        <!-- Scoreboard giữ nguyên từ code cũ -->
+        <div class="scoreboard fade-in" th:if="${match != null}">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div class="text-center mb-3 mb-lg-0">
+                    <img th:src="@{{logo}(logo=${match.matchClubStats[0].club.clubLogoPath})}" />
+                    <div class="mt-2 fw-semibold" th:text="${match.matchClubStats[0].club.clubName}"></div>
+                </div>
+                <div class="score">
+                    <span th:text="${match.matchClubStats[0].matchClubStatScore}"></span>
+                    -
+                    <span th:text="${match.matchClubStats[1].matchClubStatScore}"></span>
+                </div>
+                <div class="text-center mt-3 mt-lg-0">
+                    <img th:src="@{{logo}(logo=${match.matchClubStats[1].club.clubLogoPath})}" />
+                    <div class="mt-2 fw-semibold" th:text="${match.matchClubStats[1].club.clubName}"></div>
+                </div>
+            </div>
+            <div class="mt-3 fs-6 opacity-75"
+                th:text="${match.matchStartTime.format(T(java.time.format.DateTimeFormatter).ofPattern('dd/MM/yyyy HH:mm'))}">
+            </div>
+        </div>
+
+        <!-- Thông tin trận đấu -->
+        <div class="section slide-up p-4 mb-4 shadow-sm rounded border">
+            <h4><i class="bi bi-info-circle me-2"></i>Thông tin trận đấu</h4>
+            <ul class="list-unstyled mb-0 fs-6">
+                <li><strong>Tiêu đề:</strong> <span th:text="${match.matchTitle}">Thunder FC vs Storm United</span></li>
+                <li><strong>Thời gian:</strong> <span
+                        th:text="${match.matchStartTime != null ? match.matchStartTime.format(T(java.time.format.DateTimeFormatter).ofPattern('dd MMM yyyy HH:mm')) : 'Unknown'}">17
+                        Jul 2025 18:00</span></li>
+                <li th:if="${match.matchLinkLivestream != null}">
+                    <strong>Livestream:</strong>
+                    <a th:href="${match.matchLinkLivestream}" target="_blank"
+                        class="link-primary text-decoration-underline">
+                        <i class="bi bi-play-circle me-1"></i>Xem trực tiếp
+                    </a>
+                </li>
+                <li th:unless="${match.matchLinkLivestream != null}" class="text-muted fst-italic">
+                    <i class="bi bi-exclamation-circle me-1"></i>Không có link livestream
+                </li>
+            </ul>
+        </div>
+
+        <!-- Trọng tài trận đấu -->
+        <div class="section slide-up p-4 mb-4 shadow-sm rounded border">
+            <h4><i class="bi bi-person-badge me-2"></i>Trọng tài trận đấu</h4>
+            <div th:if="${match.matchReferenceInformation != null and !#strings.isEmpty(match.matchReferenceInformation)}"
+                class="fs-6 mb-0">
+                <pre th:text="${match.matchReferenceInformation}"
+                    style="white-space: pre-line; font-family: inherit; font-size: inherit; margin: 0; background: none; border: none; padding: 0;"></pre>
+            </div>
+            <div th:unless="${match.matchReferenceInformation != null and !#strings.isEmpty(match.matchReferenceInformation)}"
+                class="text-muted fst-italic fs-6">
+                <i class="bi bi-exclamation-circle me-2"></i>Chưa có thông tin trọng tài
+            </div>
+        </div>
+
+
+        <!-- Cầu thủ xuất sắc nhất trận -->
+        <div class="section highlight-box slide-up p-4 mb-4 shadow-sm rounded border">
+            <h4 class="fw-bold text-warning mb-4 text-center">
+                <i class="bi bi-trophy-fill me-2"></i>
+                Cầu thủ xuất sắc nhất trận
+            </h4>
+
+            <div th:if="${motm != null}" class="row align-items-center">
+                <div class="col-md-4 text-center mb-4 mb-md-0">
+                    <img th:src="@{${motm.player.playerImgPath}}" alt="Ảnh cầu thủ" class="rounded-circle shadow-sm"
+                        style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #fff;" />
+                </div>
+                <div class="col-md-8">
+                    <h5 class="fw-bold mb-2" th:text="${motm.player.playerFullName}">Tên cầu thủ</h5>
+                    <div class="text-muted mb-3 fs-6">
+                        <span th:if="${motm.player.playerNumber != null}"
+                            th:text="'Số áo: #' + ${motm.player.playerNumber}">#10</span>
+                        <span th:if="${motm.player.playerPosition != null}"
+                            th:text="' | ' + ${motm.player.playerPosition}">Tiền vệ</span>
+                    </div>
+                    <div class="row text-center text-md-start fs-6">
+                        <div class="col-sm-6 mb-2">
+                            <i class="bi bi-clock me-1"></i>Phút thi đấu:
+                            <strong th:text="${motm.matchPlayerMinutedPlayed}">90</strong>
+                        </div>
+                        <div class="col-sm-6 mb-2">
+                            <i class="bi bi-bullseye me-1"></i>Bàn thắng:
+                            <strong th:text="${motm.matchPlayerGoal}">2</strong>
+                        </div>
+                        <div class="col-sm-6 mb-2">
+                            <i class="bi bi-pass me-1"></i>Kiến tạo:
+                            <strong th:text="${motm.matchPlayerAssist}">1</strong>
+                        </div>
+                        <div class="col-sm-6 mb-2">
+                            <i class="bi bi-star-fill me-1"></i>Đánh giá:
+                            <strong th:text="${motm.rating}">8.7</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:unless="${motm != null}" class="text-center text-muted fst-italic fs-6">
+                <i class="bi bi-question-circle me-2"></i>Chưa có cầu thủ xuất sắc nhất
+            </div>
+        </div>
+
+        <!-- Bình luận trận đấu trực tiếp -->
+        <div class="section slide-up p-4 mb-4 shadow-sm rounded border" th:if="${match.matchEvents != null}">
+            <h4><i class="bi bi-chat-dots me-2"></i>Diễn biến chính trận đấu</h4>
+            <div th:each="event : ${match.matchEvents}" class="d-flex align-items-start mb-3">
+                <img class="me-3" th:src="@{'/images/logos/' + ${event.matchEventType.name().toLowerCase()} + '.png'}"
+                    alt="Icon sự kiện" style="width:32px; height:32px;" />
+                <div>
+                    <strong class="d-block mb-1"
+                        th:text="|${event.matchEventMinute}' - ${event.matchEventType.name()}|">30' - Goal</strong>
+                    <p class="mb-0 fs-6" th:text="${event.matchEventTitle}">Mô tả sự kiện</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Lineup Modal -->
+        <div class="modal fade" id="uploadLineupModal" tabindex="-1" aria-labelledby="uploadLineupModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/match/import-lineup}" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="uploadLineupModalLabel">Upload Lineup Excel</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="matchId" th:value="${match.matchId}" />
+                            <div class="mb-3">
+                                <label for="lineupFile" class="form-label">Choose Excel File (.xlsx)</label>
+                                <input class="form-control" type="file" id="lineupFile" name="file" accept=".xlsx"
+                                    required />
+                                <div class="form-text">File must contain playerId, playerName, clubId, position,
+                                    starter, etc.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-upload"></i> Upload
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-line mt-5" th:if="${match.matchEvents != null}">
+            <div th:each="event : ${match.matchEvents}" class="timeline-point"
+                th:style="'left:' + (${event.matchEventMinute} * 100 / 95) + '%'">
+                <img th:src="@{'/images/logos/' + ${event.matchEventType.name().toLowerCase()} + '.png'}" alt="Icon" />
+                <span th:text="|${event.matchEventMinute}'|"></span>
+            </div>
+        </div>
+
+        <div class="section highlights slide-up">
+            <h5 class="mb-4"><i class="bi bi-play-btn me-2"></i>Match Highlights</h5>
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4" th:each="event : ${match.matchEvents}"
+                    th:if="${event.matchEventType.name() == 'Highlight'}">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="ratio ratio-16x9">
+                            <iframe th:src="'https://www.youtube.com/embed/' + ${event.vidUrl}" title="Highlight"
+                                allowfullscreen class="rounded-top"></iframe>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title mb-1"
+                                th:text="|${event.matchEventMinute}' - ${event.matchEventType.name()}|"></h6>
+                            <p class="card-text small text-muted" th:text="${event.matchEventTitle}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LINEUP -->
+        <div class="section lineup-box slide-up">
+            <h4 class="text-center mb-4">
+                <i class="bi bi-people-fill me-2"></i>
+                Đội hình và thống kê trận đấu
+            </h4>
+
+            <ul class="nav nav-tabs mb-4" id="teamTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#homeTeam"
+                        type="button" role="tab">
+                        </i>Đội sân nhà
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="away-tab" data-bs-toggle="tab" data-bs-target="#awayTeam" type="button"
+                        role="tab">
+                        </i>Đội sân khách
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="teamTabsContent">
+                <!-- 🏠 HOME TEAM -->
+                <div class="tab-pane fade show active" id="homeTeam" role="tabpanel">
+                    <div class="team-title text-primary text-center" th:text="${match.matchClubStats[0].club.clubName}">
+                        Đội nhà
+                    </div>
+
+                    <!-- Sub-tabs: Lineup / Stat -->
+                    <ul class="nav nav-pills mb-4 justify-content-center">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#home-lineup">
+                                <i class="bi bi-diagram-3 me-2"></i>Đội hình thi đấu
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#home-stat">
+                                <i class="bi bi-bar-chart me-2"></i>Thống kê trận đấu
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Đội hình ra sân -->
+                        <div class="tab-pane fade show active" id="home-lineup">
+                            <div class="formation-grid grass-field">
+                                <!-- GK -->
+                                <div class="formation-row">
+                                    <div class="player" th:each="p : ${startingLineupHome}"
+                                        th:if="${p.playerPosition.name() == 'GK'}">
+                                        <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                        <div class="info">
+                                            <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Player</span>
+                                            <small>Thủ môn</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- DF -->
+                                <div class="formation-row">
+                                    <div class="player" th:each="p : ${startingLineupHome}"
+                                        th:if="${p.playerPosition.name() == 'CB' or p.playerPosition.name() == 'LB' or p.playerPosition.name() == 'RB'or p.playerPosition.name() == 'RWB'or p.playerPosition.name() == 'LWB'}">
+                                        <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                        <div class="info">
+                                            <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Player</span>
+                                            <small>Hậu vệ</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- MD -->
+                                <div class="formation-row">
+                                    <div class="player" th:each="p : ${startingLineupHome}"
+                                        th:if="${p.playerPosition.name() == 'MD' or p.playerPosition.name() == 'CM' or p.playerPosition.name() == 'AM'or p.playerPosition.name() == 'CDM'}">
+                                        <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                        <div class="info">
+                                            <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Player</span>
+                                            <small>Tiền vệ</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- FW -->
+                                <div class="formation-row">
+                                    <div class="player" th:each="p : ${startingLineupHome}"
+                                        th:if="${p.playerPosition.name() == 'FW'or p.playerPosition.name() == 'ST'or p.playerPosition.name() == 'SS'or p.playerPosition.name() == 'LFW'or p.playerPosition.name() == 'RFW'}">
+                                        <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                        <div class="info">
+                                            <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Player</span>
+                                            <small>Tiền đạo</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- DỰ BỊ -->
+                            <div class="substitutes-title text-center mt-4">
+                                <i class="bi bi-people me-2"></i>Cầu thủ dự bị
+                            </div>
+                            <div class="substitutes">
+                                <div class="player" th:each="p : ${substitueLineupHome}">
+                                    <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                    <div class="info">
+                                        <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Sub</span>
+                                        <small th:text="${p.playerPosition.name() == 'GK' ? 'Thủ môn' : 
+                                                        p.playerPosition.name() == 'CB' ? 'Hậu vệ' : 
+                                                        p.playerPosition.name() == 'MD' ? 'Tiền vệ' : 
+                                                        p.playerPosition.name() == 'FW' ? 'Tiền đạo' : 
+                                                        p.playerPosition.name()}">Sub</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thống kê -->
+                        <div class="tab-pane fade" id="home-stat">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-pie-chart-fill text-primary me-2"></i>
+                                            Kiểm soát bóng:
+                                        </span>
+                                        <span class="float-end fw-bold text-primary"
+                                            th:text="${clubStats[0].matchClubStatBallTimes + '%'}">46%</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-bullseye text-danger me-2"></i>
+                                            Cú sút:
+                                        </span>
+                                        <span class="float-end fw-bold"
+                                            th:text="${clubStats[0].matchClubStatShoots}">8</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-arrow-left-right text-success me-2"></i>
+                                            Đường chuyền:
+                                        </span>
+                                        <span class="float-end fw-bold"
+                                            th:text="${clubStats[0].matchClubStatPass}">390</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-flag-fill text-warning me-2"></i>
+                                            Phạt góc:
+                                        </span>
+                                        <span class="float-end fw-bold"
+                                            th:text="${clubStats[0].matchClubStatCorners}">6</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                            Thẻ vàng:
+                                        </span>
+                                        <span class="float-end fw-bold text-warning"
+                                            th:text="${clubStats[0].matchClubStatYellowCard}">3</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-x-octagon-fill text-danger me-2"></i>
+                                            Thẻ đỏ:
+                                        </span>
+                                        <span class="float-end fw-bold text-danger"
+                                            th:text="${clubStats[0].matchClubStatRedCard}">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🚗 AWAY TEAM -->
+                <div class="tab-pane fade" id="awayTeam" role="tabpanel">
+                    <div class="team-title text-danger text-center" th:text="${match.matchClubStats[1].club.clubName}">
+                        Đội khách
+                    </div>
+
+                    <!-- Sub-tabs -->
+                    <ul class="nav nav-pills mb-4 justify-content-center">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#away-lineup">
+                                <i class="bi bi-diagram-3 me-2"></i>Đội hình thi đấu
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#away-stat">
+                                <i class="bi bi-bar-chart me-2"></i>Thống kê trận đấu
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Đội hình ra sân -->
+                        <div class="tab-pane fade show active" id="away-lineup">
+                            <div class="formation-grid grass-field">
+                                <!-- GK -->
+                                <div class="formation-row">
+                                    <div class="player" th:each="p : ${startingLineupAway}"
+                                        th:if="${p.playerPosition.name() == 'GK'}">
+                                        <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                        <div class="info">
+                                            <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Player</span>
+                                            <small>Thủ môn</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- CB -->
+                                <div class="formation-row">
+                                    <div class="player" th:each="p : ${startingLineupAway}"
+                                        th:if="${p.playerPosition.name() == 'CB'}">
+                                        <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                        <div class="info">
+                                            <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Player</span>
+                                            <small>Hậu vệ</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- MD -->
+                                <div class="formation-row">
+                                    <div class="player" th:each="p : ${startingLineupAway}"
+                                        th:if="${p.playerPosition.name() == 'MD'}">
+                                        <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                        <div class="info">
+                                            <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Player</span>
+                                            <small>Tiền vệ</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- FW -->
+                                <div class="formation-row">
+                                    <div class="player" th:each="p : ${startingLineupAway}"
+                                        th:if="${p.playerPosition.name() == 'FW'}">
+                                        <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                        <div class="info">
+                                            <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Player</span>
+                                            <small>Tiền đạo</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- DỰ BỊ -->
+                            <div class="substitutes-title text-center mt-4">
+                                <i class="bi bi-people me-2"></i>Cầu thủ dự bị
+                            </div>
+                            <div class="substitutes">
+                                <div class="player" th:each="p : ${substitueLineupAway}">
+                                    <img th:src="@{${p.playerImgPath}}" alt="Player">
+                                    <div class="info">
+                                        <span th:text="${p.playerNumber + '. ' + p.playerFullName}">Sub</span>
+                                        <small th:text="${p.playerPosition.name() == 'GK' ? 'Thủ môn' : 
+                                                        p.playerPosition.name() == 'CB' ? 'Hậu vệ' : 
+                                                        p.playerPosition.name() == 'MD' ? 'Tiền vệ' : 
+                                                        p.playerPosition.name() == 'FW' ? 'Tiền đạo' : 
+                                                        p.playerPosition.name()}">Sub</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thống kê -->
+                        <div class="tab-pane fade" id="away-stat">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-pie-chart-fill text-primary me-2"></i>
+                                            Kiểm soát bóng:
+                                        </span>
+                                        <span class="float-end fw-bold text-primary"
+                                            th:text="${clubStats[1].matchClubStatBallTimes + '%'}">54%</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-bullseye text-danger me-2"></i>
+                                            Cú sút:
+                                        </span>
+                                        <span class="float-end fw-bold"
+                                            th:text="${clubStats[1].matchClubStatShoots}">12</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-arrow-left-right text-success me-2"></i>
+                                            Đường chuyền:
+                                        </span>
+                                        <span class="float-end fw-bold"
+                                            th:text="${clubStats[1].matchClubStatPass}">420</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-flag-fill text-warning me-2"></i>
+                                            Phạt góc:
+                                        </span>
+                                        <span class="float-end fw-bold"
+                                            th:text="${clubStats[1].matchClubStatCorners}">4</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                            Thẻ vàng:
+                                        </span>
+                                        <span class="float-end fw-bold text-warning"
+                                            th:text="${clubStats[1].matchClubStatYellowCard}">2</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="stat-item border rounded p-3 bg-light">
+                                        <span class="fw-semibold">
+                                            <i class="bi bi-x-octagon-fill text-danger me-2"></i>
+                                            Thẻ đỏ:
+                                        </span>
+                                        <span class="float-end fw-bold text-danger"
+                                            th:text="${clubStats[1].matchClubStatRedCard}">1</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Match Modal -->
+        <div class="modal fade" id="editMatchModal" tabindex="-1" aria-labelledby="editMatchModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="editMatchForm" th:action="@{/admin/matches/update}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editMatchModalLabel">
+                                <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa trận đấu
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="matchId" id="editMatchId" />
+                            <div class="mb-3">
+                                <label for="redirectSelect" class="form-label">
+                                    <i class="bi bi-arrow-return-left me-1"></i>Sau khi cập nhật, quay lại:
+                                </label>
+                                <select class="form-select" name="redirectTo" id="redirectSelect">
+                                    <option value="matches">Trang danh sách trận đấu</option>
+                                    <option value="detail">Trang chi tiết trận này</option>
+                                    <option value="admin">Trang quản trị</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editMatchTitle" class="form-label">
+                                    <i class="bi bi-card-text me-1"></i>Tiêu đề trận đấu
+                                </label>
+                                <input type="text" class="form-control" name="matchTitle" id="editMatchTitle"
+                                    required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editMatchTime" class="form-label">
+                                    <i class="bi bi-clock me-1"></i>Thời gian bắt đầu
+                                </label>
+                                <input type="datetime-local" class="form-control" name="matchStartTime"
+                                    id="editMatchTime" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editMatchDescription" class="form-label">
+                                    <i class="bi bi-text-paragraph me-1"></i>Mô tả trận đấu
+                                </label>
+                                <textarea class="form-control" name="matchDescription" id="editMatchDescription"
+                                    rows="3" required></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editMatchLink" class="form-label">
+                                    <i class="bi bi-link-45deg me-1"></i>Link livestream
+                                </label>
+                                <input type="url" class="form-control" name="matchLinkLivestream" id="editMatchLink"
+                                    placeholder="https://example.com/livestream" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editMatchReferenceInformation" class="form-label">
+                                    <i class="bi bi-info-circle me-1"></i>Thông tin trọng tài
+                                </label>
+                                <textarea class="form-control" name="matchReferenceInformation"
+                                    id="editMatchReferenceInformation" rows="5"
+                                    placeholder="Trọng tài chính: ...&#10;Trợ lý trọng tài 1: ..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>Hủy
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>Cập nhật trận đấu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Highlight Modal -->
+        <div class="modal fade" id="addHighlightModal" tabindex="-1" aria-labelledby="addHighlightModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/match/add-highlight}" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addHighlightModalLabel">
+                                <i class="bi bi-plus-circle me-2"></i>Thêm Highlight
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="matchId" th:value="${match.matchId}" />
+                            <div class="mb-3">
+                                <label for="highlightMinute" class="form-label">
+                                    <i class="bi bi-clock me-1"></i>Phút
+                                </label>
+                                <input type="number" class="form-control" id="highlightMinute" name="matchEventMinute"
+                                    required placeholder="Nhập phút xảy ra highlight" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="highlightTitle" class="form-label">
+                                    <i class="bi bi-text-left me-1"></i>Tiêu đề
+                                </label>
+                                <input type="text" class="form-control" id="highlightTitle" name="matchEventTitle"
+                                    required placeholder="Nhập tiêu đề highlight" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="highlightVideo" class="form-label">
+                                    <i class="bi bi-youtube me-1"></i>YouTube Video ID
+                                </label>
+                                <input type="text" class="form-control" id="highlightVideo" name="vidUrl"
+                                    placeholder="e.g. dQw4w9WgXcQ" required />
+                                <div class="form-text">Chỉ cần nhập ID của video YouTube (phần sau dấu v= trong URL)
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hightlightThumnail" class="form-label">
+                                    <i class="bi bi-image me-1"></i>Hình thu nhỏ
+                                </label>
+                                <input class="form-control" type="file" id="hightlightThumnail"
+                                    name="hightlightThumnail" accept="image/*">
+                                <div class="form-text">Tùy chọn: Upload hình thu nhỏ cho highlight</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>Đóng
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>Thêm Highlight
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bình luận bài viết -->
+        <div class="section slide-up p-4 mb-5 shadow-sm rounded border container" th:if="${isFixture}">
+            <h4><i class="bi bi-chat-left-dots me-2"></i>Bình luận trận đấu</h4>
+
+            <!-- Nếu người dùng đã đăng nhập thì cho phép bình luận -->
+            <div sec:authorize="!isAnonymous()">
+                <!-- Form Gửi bình luận -->
+                <form th:action="@{'/match/comment/' + ${match.matchId}}" method="post" class="mb-4">
+                    <div class="mb-3">
+                        <textarea class="form-control" name="commentContent" rows="3" placeholder="Nhập bình luận..."
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send me-1"></i> Gửi bình luận
+                    </button>
+                </form>
+            </div>
+
+            <!-- Nếu chưa đăng nhập thì hiện thông báo -->
+            <div sec:authorize="isAnonymous()" class="alert alert-warning">
+                Vui lòng <a th:href="@{/auth/login}">đăng nhập</a> để bình luận.
+            </div>
+
+            <!-- Hiển thị danh sách bình luận -->
+            <div th:if="${#lists.isEmpty(comments)}" class="text-muted fst-italic">Chưa có bình luận nào.</div>
+
+            <div class="list-group" th:if="${not #lists.isEmpty(comments)}">
+                <div th:each="c : ${comments}" class="list-group-item list-group-item-light mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong th:text="${c.user.username}">Username</strong>
+                        <small class="text-muted"
+                            th:text="${#temporals.format(c.commentDateCreated, 'dd/MM/yyyy HH:mm')}">Thời gian</small>
+                    </div>
+                    <p class="mb-0 mt-2" th:text="${c.commentContent}">Nội dung bình luận...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer fragment -->
+    <div th:replace="fragments/footer :: siteFooter"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Thêm hiệu ứng cho các element khi scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function (entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationDelay = Math.random() * 0.3 + 's';
+                    entry.target.classList.add('slide-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Quan sát tất cả các section
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Hiệu ứng hover cho player cards
+        document.querySelectorAll('.player').forEach(player => {
+            player.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-3px) scale(1.02)';
+                this.style.transition = 'all 0.3s ease';
+            });
+
+            player.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Smooth transition cho tab switching
+        document.querySelectorAll('[data-bs-toggle="tab"], [data-bs-toggle="pill"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function (e) {
+                const targetPane = document.querySelector(e.target.getAttribute('data-bs-target'));
+                if (targetPane) {
+                    targetPane.style.opacity = '0';
+                    targetPane.style.transform = 'translateY(10px)';
+
+                    setTimeout(() => {
+                        targetPane.style.transition = 'all 0.3s ease';
+                        targetPane.style.opacity = '1';
+                        targetPane.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+        });
+
+        // Loading animation cho stats
+        document.querySelectorAll('.stat-item').forEach((item, index) => {
+            item.style.animationDelay = (index * 0.1) + 's';
+            item.classList.add('fade-in');
+        });
+
+        // Hàm mở modal chỉnh sửa trận đấu
+        function openEditMatchModal(button) {
+            const matchId = button.getAttribute('data-id');
+            const matchTitle = button.getAttribute('data-title');
+            const matchStart = button.getAttribute('data-start');
+            const matchDescription = button.getAttribute('data-description');
+            const matchLink = button.getAttribute('data-link');
+            const referenceInfo = button.getAttribute('data-referenceinfor');
+
+            // Điền dữ liệu vào form
+            document.getElementById('editMatchId').value = matchId;
+            document.getElementById('editMatchTitle').value = matchTitle;
+            document.getElementById('editMatchDescription').value = matchDescription || 'Không có mô tả';
+            document.getElementById('editMatchLink').value = matchLink || '';
+            document.getElementById('editMatchReferenceInformation').value = referenceInfo || '';
+
+            // Xử lý format thời gian cho datetime-local input
+            if (matchStart) {
+                // Chuyển từ ISO string sang format datetime-local (YYYY-MM-DDTHH:mm)
+                const date = new Date(matchStart);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                document.getElementById('editMatchTime').value = formattedDateTime;
+            }
+
+            // Mở modal
+            const modal = new bootstrap.Modal(document.getElementById('editMatchModal'));
+            modal.show();
+        }
+    </script>
+</body>
+
+</html>

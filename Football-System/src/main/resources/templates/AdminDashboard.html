@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .sidebar {
+            height: 100vh;
+            background-color: #fff;
+            border-right: 1px solid #dee2e6;
+        }
+
+        .sidebar .nav-link {
+            color: #333;
+            cursor: pointer;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #e9ecef;
+            font-weight: 600;
+        }
+
+        .dashboard-card {
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .table td img {
+            border-radius: 50%;
+        }
+
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        <style>#userList .user {
+            padding: 10px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #userList .user:hover {
+            background-color: #f0f0f0;
+        }
+
+        #messages p {
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        #messages p.admin {
+            text-align: right;
+            color: #0d6efd;
+        }
+
+        #messages p.user {
+            text-align: left;
+            color: #333;
+        }
+    </style>
+
+    </style>
+</head>
+
+<body>
+    <div th:replace="fragments/header :: siteHeader"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <aside class="col-md-2 sidebar p-3">
+                <h5 class="mb-4 text-primary"><i class="bi bi-speedometer"></i> Admin Panel</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link active" onclick="showTab('dashboard')"><i
+                                class="bi bi-grid me-2"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('users')"><i
+                                class="bi bi-people me-2"></i> Users</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('products')"><i
+                                class="bi bi-box me-2"></i> Products</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('matches')"><i
+                                class="bi bi-calendar-event me-2"></i> Matches</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('requests')"><i
+                                class="bi bi-calendar-event me-2"></i> Requests</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('generate-fixtures')"><i
+                                class="bi bi-shuffle me-2"></i> Auto Fixture</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('tickets')"><i
+                                class="bi bi-ticket-perforated me-2"></i> Tickets</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('chat')"><i
+                                class="bi bi-chat-dots me-2"></i> Admin Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showTab('club')"><i
+                                class="bi bi-person-circle me-2"></i> Active club</a></li>
+                </ul>
+            </aside>
+
+            <main class="col-md-10 p-4">
+                <div id="dashboard" class="tab-content">
+                    <h3 class="mb-4">Dashboard</h3>
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="p-3 bg-white dashboard-card">
+                                <h6>Total Users</h6>
+                                <h4 class="text-primary">72,540</h4>
+                                <small class="text-success">↑ 12.5% from last month</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-white dashboard-card">
+                                <h6>Sessions</h6>
+                                <h4 class="text-primary">29.4%</h4>
+                                <small class="text-success">↑ 17%</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-white dashboard-card">
+                                <h6>Click Rate</h6>
+                                <h4 class="text-primary">56.8%</h4>
+                                <small class="text-danger">↓ 4.4%</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-white dashboard-card">
+                                <h6>Pageviews</h6>
+                                <h4 class="text-primary">92,913</h4>
+                                <small class="text-muted">from 2,913</small>
+                            </div>
+                        </div>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-3">
+                                <div class="p-3 bg-white dashboard-card">
+                                    <h6>Total Revenue</h6>
+                                    <h4 class="text-primary"
+                                        th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 2, 'POINT')} + ' ₫'">
+                                        0</h4>
+                                    <small class="text-muted">From successful orders</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-white dashboard-card">
+                                    <h6>Top Buyer</h6>
+                                    <h4 class="text-primary" th:text="${topBuyer}">No data</h4>
+                                    <small class="text-muted">Highest total spent</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-white dashboard-card">
+                                    <h6>Total Products Sold</h6>
+                                    <h4 class="text-primary" th:text="${totalProductsSold}">0</h4>
+                                    <small class="text-muted">Across all orders</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-white dashboard-card">
+                                    <h6>Best Seller</h6>
+                                    <h4 class="text-primary" th:text="${bestSeller}">None</h4>
+                                    <small class="text-muted">Most ordered product</small>
+                                </div>
+                            </div>
+                            <div class="card mt-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Revenue (Last 6 Months)</h5>
+                                    <canvas id="revenueChart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="users" class="tab-content d-none">
+                    <h3 class="mb-4">Users</h3>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Full Name</th>
+                                        <th>Status</th>
+                                        <th>Type</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="user : ${users}">
+                                        <td>
+                                            <img th:src="@{{img}(img=${user.imgPath})}" width="32">
+                                            <span th:text="${user.fullname}" class="ms-2">User Name</span>
+                                        </td>
+                                        <td><span class="status-dot bg-success"></span> <span>Status</span></td>
+                                        <td th:text="${user.role.name()}">Type</td>
+                                        <td th:text="${user.email}">email@site.com</td>
+                                        <td>
+                                            <form th:action="@{'/admin/user?userId=' + ${user.userId}}" method="post">
+                                                <input type="hidden" name="_method" value="put" />
+                                                <!-- For method override -->
+                                                <button type="submit"
+                                                    th:classappend="${user.isBan} ? 'btn btn-success' : 'btn btn-danger'"
+                                                    th:text="${user.isBan} ? 'Unban' : 'Ban'">
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="products" class="tab-content d-none">
+                    <h3 class="mb-4">Products</h3>
+                    <button class="btn btn-primary btn-sm" onclick="openAddProductModal()">
+                        <i class="bi bi-plus-circle"></i> Add Product
+                    </button>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Price ($)</th>
+                                        <th>Amount</th>
+                                        <th>Image</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="product : ${products}">
+                                        <td th:text="${product.productName}">Name</td>
+                                        <td th:text="${product.productDescription}">Description</td>
+                                        <td th:text="${product.productPrice}">0.0</td>
+                                        <td th:text="${product.productAmount}">0</td>
+                                        <td><img th:src="@{{img}(img=${product.productImgPath})}" width="40"></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-warning" onclick="openEditProductModal(this)"
+                                                th:data-id="${product.productId}" th:data-name="${product.productName}"
+                                                th:data-description="${product.productDescription}"
+                                                th:data-price="${product.productPrice}"
+                                                th:data-category="${product.categoryProduct}"
+                                                th:data-quantity="${product.productAmount}"
+                                                th:data-imgpath="${product.productImgPath}">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="matches" class="tab-content d-none">
+                    <h3 class="mb-4">Matches</h3>
+                    <!-- <button class="btn btn-primary btn-sm" onclick="openAddMatchModal()">
+                        <i class="bi bi-plus-circle"></i> Add Match
+                    </button> -->
+                    <div class="mb-3">
+                        <label for="roundFilter" class="form-label">Filter by Round:</label>
+                        <select id="roundFilter" class="form-select" onchange="filterMatchesByRound()">
+                            <option value="">All Rounds</option>
+                            <option value="Vòng 1">Vòng 1</option>
+                            <option value="Vòng 2">Vòng 2</option>
+                            <option value="Vòng 3">Vòng 3</option>
+                            <option value="Vòng 4">Vòng 4</option>
+                            <option value="Vòng 5">Vòng 5</option>
+                            <option value="Vòng 6">Vòng 6</option>
+                            <option value="Vòng 7">Vòng 7</option>
+                            <option value="Vòng 8">Vòng 8</option>
+                            <option value="Vòng 9">Vòng 9</option>
+                            <option value="Vòng 10">Vòng 10</option>
+                            <option value="Vòng 11">Vòng 11</option>
+                            <option value="Vòng 12">Vòng 12</option>
+                            <option value="Vòng 13">Vòng 13</option>
+                            <option value="Vòng 14">Vòng 14</option>
+                        </select>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Start Time</th>
+                                        <th>Description</th>
+                                        <th>Livestream</th>
+                                        <th>Clubs</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="match : ${matches}" th:attr="data-round=${match.matchDescription}"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        th:title="${'Vé: ' + match.totalTickets + ', Đã bán: ' + match.soldTickets}">
+                                        <td th:text="${match.matchTitle}">Match Title</td>
+                                        <td th:text="${#temporals.format(match.matchStartTime, 'dd/MM/yyyy HH:mm')}">
+                                            Time</td>
+                                        <td th:text="${match.matchDescription}">Description</td>
+                                        <td>
+                                            <a th:href="${match.matchLinkLivestream}" target="_blank"
+                                                class="btn btn-outline-primary btn-sm">
+                                                Watch
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <ul class="mb-0" th:if="${match.matchClubStats}">
+                                                <li th:each="stat : ${match.matchClubStats}"
+                                                    th:text="${stat.club.clubName}">Club</li>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-warning" th:data-id="${match.matchId}"
+                                                th:data-title="${match.matchTitle}"
+                                                th:data-start="${#temporals.format(match.matchStartTime, 'yyyy-MM-dd''T''HH:mm')}"
+                                                th:data-description="${match.matchDescription}"
+                                                th:data-link="${match.matchLinkLivestream}"
+                                                th:data-referenceInfor="|${match.matchReferenceInformation}|"
+                                                onclick="openEditMatchModal(this)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Match Modal -->
+                <div class="modal fade" id="editMatchModal" tabindex="-1" aria-labelledby="editMatchModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form id="editMatchForm" th:action="@{/admin/matches/update}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editMatchModalLabel">Edit Match</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" name="matchId" id="editMatchId" />
+
+                                    <label class="form-label">Title</label>
+                                    <input type="text" class="form-control mb-2" name="matchTitle" id="editMatchTitle"
+                                        required />
+
+                                    <label class="form-label">Start Time</label>
+                                    <input type="datetime-local" class="form-control mb-2" name="matchStartTime"
+                                        id="editMatchTime" required />
+
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control mb-2" name="matchDescription"
+                                        id="editMatchDescription" required></textarea>
+
+                                    <label class="form-label">Livestream Link</label>
+                                    <input type="url" class="form-control mb-2" name="matchLinkLivestream"
+                                        id="editMatchLink" />
+                                    <label class="form-label" for="editMatchReferenceInformation">Match Reference
+                                        Information:</label>
+                                    <textarea class="form-control mb-2" name="matchReferenceInformation"
+                                        id="editMatchReferenceInformation" rows="5"></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Update Match</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="requests" class="tab-content d-none">
+                    <h3 class="mb-4">Requests</h3>
+
+                    <!-- Tabs Nav -->
+                    <ul class="nav nav-tabs" id="clubTab" role="tablist">
+                        <li class="nav-item" role="presentation" th:each="club, iterStat : ${allClubs}">
+                            <button class="nav-link" th:classappend="${iterStat.index == 0} ? 'active'"
+                                th:id="'tab-' + ${club.clubName.hashCode()}" data-bs-toggle="tab"
+                                th:data-bs-target="'#tab-pane-' + ${club.clubName.hashCode()}" type="button" role="tab"
+                                th:aria-controls="'tab-pane-' + ${club.clubName.hashCode()}"
+                                th:aria-selected="${iterStat.index == 0} ? 'true' : 'false'" th:text="${club.clubName}">
+                                Club Name
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!--request Tabs Content -->
+                    <div th:each="club, iterStat : ${allClubs}"
+                        th:class="'tab-pane fade' + (${iterStat.index == 0} ? ' show active' : '')"
+                        th:id="'tab-pane-' + ${club.clubName.hashCode()}" role="tabpanel"
+                        th:aria-labelledby="'tab-' + ${club.clubName.hashCode()}">
+
+                        <div th:if="${#maps.containsKey(requestsByClub, club.clubName)}"
+                            th:with="requests=${requestsByClub[club.clubName]}">
+                            <div th:if="${!requests.isEmpty()}">
+                                <!-- Table if there are requests -->
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <table class="table table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Title</th>
+                                                    <th>Created</th>
+                                                    <th>Updated</th>
+                                                    <th>Description</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="request : ${requests}">
+                                                    <td th:text="${request.requestTitle}">Request Title</td>
+                                                    <td
+                                                        th:text="${#temporals.format(request.requestDateCreate, 'dd/MM/yyyy HH:mm')}">
+                                                        Created</td>
+                                                    <td
+                                                        th:text="${#temporals.format(request.requestDateUpdate, 'dd/MM/yyyy HH:mm')}">
+                                                        Updated</td>
+                                                    <td class="request-info" th:text="${request.requestInfor}">
+                                                        Loading...</td>
+
+
+                                                    <td>
+                                                        <span th:if="${request.requestStatus.name() == 'PENDING'}"
+                                                            th:text="${request.requestStatus.name()}"
+                                                            class="badge rounded-pill bg-warning text-dark"></span>
+                                                        <span th:if="${request.requestStatus.name() == 'CONFIRM'}"
+                                                            th:text="${request.requestStatus.name()}"
+                                                            class="badge rounded-pill bg-success"></span>
+                                                        <span th:if="${request.requestStatus.name() == 'CANCEL'}"
+                                                            th:text="${request.requestStatus.name()}"
+                                                            class="badge rounded-pill bg-danger"></span>
+                                                        <span
+                                                            th:if="${request.requestStatus.name() != 'PENDING' and request.requestStatus.name() != 'CONFIRM' and request.requestStatus.name() != 'CANCEL'}"
+                                                            th:text="${request.requestStatus.name()}"
+                                                            class="badge rounded-pill bg-secondary"></span>
+                                                    </td>
+                                                    <td th:if="${request.requestStatus.name() == 'PENDING'}">
+                                                        <form
+                                                            th:action="@{/admin/requests(requestTitle=${request.requestTitle})}"
+                                                            method="post" class="d-flex gap-2">
+                                                            <input type="hidden" name="requestId"
+                                                                th:value="${request.requestId}" />
+                                                            <button name="status" value="CONFIRM" type="submit"
+                                                                class="btn btn-outline-success btn-sm">
+                                                                <i class="bi bi-check-circle"></i> Accept
+                                                            </button>
+                                                            <button name="status" value="CANCEL" type="submit"
+                                                                class="btn btn-outline-danger btn-sm">
+                                                                <i class="bi bi-x-circle"></i> Cancel
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div th:if="${requests.isEmpty()}" class="text-center text-muted p-4">
+                                <i class="bi bi-info-circle"></i> Chưa có yêu cầu nào từ câu lạc bộ này.
+                            </div>
+                        </div>
+
+                        <div th:if="${!#maps.containsKey(requestsByClub, club.clubName)}"
+                            class="text-center text-muted p-4">
+                            <i class="bi bi-info-circle"></i> Chưa có yêu cầu nào từ câu lạc bộ này.
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <!-- Manage ticket -->
+                <div id="tickets" class="tab-content d-none">
+                    <h3 class="mb-4">Tickets</h3>
+                    <button class="btn btn-primary btn-sm" onclick="openAddTicketModal()">
+                        <i class="bi bi-plus-circle"></i> Add Ticket
+                    </button>
+                    <div th:if="${error != null && !error.isBlank()}"
+                        class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span th:text="${error}">Lỗi!</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <div th:if="${success != null && !success.isBlank()}"
+                        class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${success}">Thành công!</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <select id="filterMatch" class="form-select" onchange="filterTickets()">
+                                        <option value="">All Matches</option>
+                                        <option th:each="match : ${matchFixture}" th:value="${match.matchTitle}"
+                                            th:text="${match.matchTitle}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="filterArea" class="form-select" onchange="filterTickets()">
+                                        <option value="">All Areas</option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option>
+                                        <option value="F">F</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <select id="filterType" class="form-select" onchange="filterTickets()">
+                                        <option value="">All Types</option>
+                                        <option value="Standard">Standard</option>
+                                        <option value="VIP">VIP</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Match</th>
+                                        <th>Quantity</th>
+                                        <th>Area</th>
+                                        <th>Type</th>
+                                        <th>Price ($)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="ticket : ${tickets}"
+                                        th:attr="data-match=${ticket.match.matchTitle}, data-area=${ticket.ticketArea}, data-type=${ticket.ticketType}">
+                                        <td th:text="${ticket.match.matchTitle}">Match Title</td>
+                                        <td th:text="${ticket.ticketAmount}">100</td>
+                                        <td th:text="${ticket.ticketArea}">VIP</td>
+                                        <td th:text="${ticket.ticketType}">ADULT</td>
+                                        <td th:text="${ticket.ticketPrice}">50.00</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-warning" onclick="openEditTicketModal(this)"
+                                                th:data-id="${ticket.ticketId}" th:data-area="${ticket.ticketArea}"
+                                                th:data-type="${ticket.ticketType}"
+                                                th:data-amount="${ticket.ticketAmount}"
+                                                th:data-price="${ticket.ticketPrice}"
+                                                th:data-title="${ticket.ticketTitle}"
+                                                th:data-matchid="${ticket.match.matchId}">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Ticket Modal -->
+                <div class="modal fade" id="addTicketModal" tabindex="-1" aria-labelledby="addTicketModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <form id="ticketForm">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addTicketModalLabel">Add Tickets by Area & Type</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <label class="form-label">Match</label>
+                                    <select id="matchId" class="form-select mb-3" required>
+                                        <option th:each="match : ${matchFixture}" th:value="${match.matchId}"
+                                            th:text="${match.matchTitle}">
+                                            Match
+                                        </option>
+                                    </select>
+
+                                    <table class="table table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Area</th>
+                                                <th>Type</th>
+                                                <th>Quantity</th>
+                                                <th>Price ($)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Standard Tickets Row -->
+                                            <tr
+                                                th:each="area : ${T(com.swp.myleague.model.entities.ticket.TicketArea).values()}">
+                                                <td th:text="${area}">A</td>
+                                                <td>Standard</td>
+                                                <td>
+                                                    <input type="number" class="form-control ticket-quantity" min="0"
+                                                        value="0" th:attr="data-area=${area}, data-type='Standard'" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control ticket-price" min="0"
+                                                        step="0.01" value="0.00"
+                                                        th:attr="data-area=${area}, data-type='Standard'" />
+                                                </td>
+                                            </tr>
+                                            <!-- VIP Tickets Row -->
+                                            <tr
+                                                th:each="area : ${T(com.swp.myleague.model.entities.ticket.TicketArea).values()}">
+                                                <td th:text="${area}">A</td>
+                                                <td>VIP</td>
+                                                <td>
+                                                    <input type="number" class="form-control ticket-quantity" min="0"
+                                                        value="0" th:attr="data-area=${area}, data-type='VIP'" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control ticket-price" min="0"
+                                                        step="0.01" value="0.00"
+                                                        th:attr="data-area=${area}, data-type='VIP'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" onclick="submitDetailedTickets()">Save
+                                        Tickets</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Ticket Modal -->
+                <div class="modal fade" id="editTicketModal" tabindex="-1" aria-labelledby="editTicketModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form id="editTicketForm" method="post" th:action="@{/admin/tickets/update}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editTicketModalLabel">Edit Ticket</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" name="ticketId" id="editTicketId">
+                                    <input type="hidden" name="matchId" id="editTicketMatchId">
+                                    <input type="hidden" name="ticketTitle" id="editTicketTitle">
+
+                                    <label class="form-label">Area</label>
+                                    <select name="ticketArea" id="editTicketArea" class="form-select mb-2" required>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option>
+                                        <option value="F">F</option>
+                                    </select>
+
+                                    <label class="form-label">Type</label>
+                                    <select name="ticketType" id="editTicketType" class="form-select mb-2" required>
+                                        <option value="Standard">Standard</option>
+                                        <option value="VIP">VIP</option>
+                                    </select>
+
+                                    <label class="form-label">Quantity</label>
+                                    <input type="number" name="ticketAmount" id="editTicketAmount"
+                                        class="form-control mb-2" required>
+
+                                    <label class="form-label">Price ($)</label>
+                                    <input type="number" step="0.01" name="ticketPrice" id="editTicketPrice"
+                                        class="form-control mb-2" required>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Update Ticket</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Auto Fixture Tab -->
+                <div id="generate-fixtures" class="tab-content d-none">
+                    <h3 class="mb-4">Generate Fixtures Automatically</h3>
+                    <button class="btn btn-outline-primary mb-3" onclick="openAutoFixtureModal()">Generate
+                        Now</button>
+
+                    <!-- Thông báo success/error -->
+                    <div th:if="${success != null}" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                        <strong>Thành công!</strong> <span th:text="${success}">Operation completed successfully</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                        <strong>Lỗi!</strong> <span th:text="${error}">An error occurred</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Thông báo về tiến độ -->
+                    <div th:if="${hasAutoFixtureSession}" class="alert alert-info mb-3" role="alert">
+                        <strong>Tiến độ:</strong>
+                        <span th:text="${completedRounds} + ' / ' + ${totalRounds} + ' vòng đấu đã được lưu'">0 / 0 vòng đấu đã được lưu</span>
+                        <span th:if="${incompleteRoundsCount != null and incompleteRoundsCount > 0}">
+                            | <span th:text="${incompleteRoundsCount} + ' vòng đấu cần lưu'">0 vòng đấu cần lưu</span>
+                        </span>
+                    </div>
+
+                    <!-- Thông báo khi không còn rounds nào để hiển thị -->
+                    <div th:if="${fixtures != null and (fixturesByRound == null or fixturesByRound.isEmpty())}" 
+                         class="alert alert-success mb-3" role="alert">
+                        <h5 class="alert-heading">Tuyệt vời!</h5>
+                        <p>Tất cả các vòng đấu đã được lưu vào database. Không còn vòng đấu nào cần lưu.</p>
+                        <hr>
+                        <p class="mb-0">Bạn có thể tạo lại fixtures mới nếu cần thiết.</p>
+                    </div>
+
+                    <div th:if="${fixtures != null and fixturesByRound != null and !fixturesByRound.isEmpty()}" 
+                         th:each="entry : ${fixturesByRound}" class="mb-4">
+                        <h5 class="text-primary" th:text="'Vòng ' + ${entry.key}">Vòng 1</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6" th:each="match : ${entry.value}">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between mb-2"
+                                            th:if="${match.matchClubStats != null and #lists.size(match.matchClubStats) > 0}">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img th:src="@{{logo}(logo=${match.matchClubStats[0].club.clubLogoPath})}"
+                                                    alt="Home" width="32" height="32">
+                                                <strong th:text="${match.matchClubStats[0].club.clubName}">Home</strong>
+                                            </div>
+                                            <span class="fw-bold">vs</span>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <strong th:text="${match.matchClubStats[1].club.clubName}">Away</strong>
+                                                <img th:src="@{{logo}(logo=${match.matchClubStats[1].club.clubLogoPath})}"
+                                                    alt="Away" width="32" height="32">
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Title</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                th:value="${match.matchTitle}">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Date</label>
+                                            <input type="datetime-local" class="form-control form-control-sm"
+                                                th:value="${#temporals.format(match.matchStartTime, 'yyyy-MM-dd''T''HH:mm')}">
+                                        </div>
+                                        <div>
+                                            <label class="form-label">Venue</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                th:value="${match.matchDescription}">
+                                        </div>
+                                        <div>
+                                            <label class="form-label">Link livestream</label>
+                                            <input type="url" class="form-control form-control-sm"
+                                                th:value="${match.matchLinkLivestream}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <form th:action="@{/admin/fixture/save-round}" method="post" class="mt-3">
+                            <input type="hidden" name="roundNumber" th:value="${entry.key}" />
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save Matches for Vòng <span th:text="${entry.key}">1</span>
+                            </button>
+                            <span class="badge bg-secondary ms-2" th:text="'(' + ${entry.value.size()} + ' matches)'">(0 matches)</span>
+                        </form>
+                        <hr class="my-3">
+                    </div>
+                </div>
+
+                <!-- Auto Fixture Modal -->
+                <div class="modal fade" id="autoFixtureModal" tabindex="-1" aria-labelledby="autoFixtureModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form th:action="@{/admin/fixture/create}" method="get">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="autoFixtureModalLabel">Fixture Generation Settings
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" class="form-control mb-2" name="startDate" required>
+
+                                    <label class="form-label">Match Slots per Day</label>
+                                    <input type="number" class="form-control mb-2" name="matchSlots" min="1" required>
+
+                                    <input hidden class="form-control" name="recreate" value="true">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Generate</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="confirmRegenerateModal" tabindex="-1"
+                    aria-labelledby="confirmRegenerateLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning">
+                                <h5 class="modal-title" id="confirmRegenerateLabel">Xác nhận khởi tạo lại</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body">
+                                Dữ liệu trận đấu hiện có đã được khởi tạo trước đó. Bạn có chắc chắn muốn khởi tạo
+                                lại
+                                không? <br />
+                                <small class="text-muted">Thao tác này có thể ghi đè lịch cũ.</small>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="button" class="btn btn-danger" onclick="confirmRegenerate()">Tiếp
+                                    tục</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="chat" class="tab-content d-flex flex-column" style="height: 100vh;">
+                    <h3 class="mb-3 fw-bold text-primary">🎧 Admin Chat Panel</h3>
+
+                    <div class="d-flex flex-grow-1 border rounded shadow-sm overflow-hidden"
+                        style="background-color: #f8f9fa;">
+                        <!-- User List -->
+                        <div id="userList" class="p-3 border-end bg-white" style="width: 260px; overflow-y: auto;">
+                            <h6 class="mb-3 text-secondary">👥 Người dùng</h6>
+                            <!-- Dynamic user list -->
+                        </div>
+
+                        <!-- Chat Area -->
+                        <div id="chatArea" class="flex-grow-1 d-flex flex-column p-3">
+                            <!-- Header -->
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <strong id="activeUser" class="text-dark">🔒 Chọn người dùng để bắt đầu</strong>
+                            </div>
+
+                            <!-- Messages -->
+                            <div id="messages" class="flex-grow-1 border rounded bg-white p-3 mb-3"
+                                style="overflow-y: auto; min-height: 400px;">
+                                <!-- Messages appear here -->
+                            </div>
+
+                            <!-- Message Input -->
+                            <div id="sendBox" class="d-flex gap-2">
+                                <input type="text" id="messageInput" class="form-control"
+                                    placeholder="Nhập tin nhắn...">
+                                <button class="btn btn-primary px-4" onclick="sendMessage()">Gửi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="club" class="tab-content d-flex flex-column" style="height: 100vh;">
+                    <h3 class="mb-4">Active Clubs</h3>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Club Name</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="club : ${clubs}">
+                                        <td th:text="${club.clubName}">Club Name</td>
+                                        <td>
+                                            <span th:class="${club.isActive ? 'badge bg-success' : 'badge bg-danger'}"
+                                                th:text="${club.isActive ? 'Active' : 'Inactive'}">
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <form th:action="@{'/admin/active/club/' + ${club.clubId}}" method="get">
+                                                <button type="submit" class="btn btn-sm btn-warning">
+                                                    <i class="bi bi-toggle-off"></i>
+                                                    <span th:text="${club.isActive ? 'Deactivate' : 'Activate'}"></span>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+            </main>
+        </div>
+    </div>
+
+
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/addproduct}" method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addProductModalLabel">Add Product</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" class="form-control mb-2" name="productName" placeholder="Name" required>
+
+                        <textarea class="form-control mb-2" name="productDescription" placeholder="Description"
+                            required></textarea>
+
+
+
+                        <select class="form-select mb-2" name="categoryProduct" required>
+                            <option value="" selected disabled>Select category</option>
+                            <option value="AO">Áo</option>
+                            <option value="BONGDA">Bóng Đá</option>
+                            <option value="QUAN">Quần</option>
+                            <option value="PHUKIEN">Phụ Kiện</option>
+                            <option value="CLB">Câu lạc bộ</option>
+                        </select>
+
+                        <input type="number" step="0.01" class="form-control mb-2" name="productPrice"
+                            placeholder="Price" required>
+
+                        <input type="number" class="form-control mb-2" name="productAmount" placeholder="Amount"
+                            required>
+
+                        <label for="productImage" class="form-label">Upload Product Image</label>
+                        <input class="form-control mb-2" type="file" id="productImage" name="productImage"
+                            accept="image/*" required>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editProductForm" method="post" th:action="@{/admin/product/update}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProductModalLabel">Update Product</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="productId" id="editProductId">
+
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control mb-2" name="productName" id="editProductName" required>
+
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control mb-2" name="productDescription" id="editProductDescription"
+                            rows="3"></textarea>
+
+                        <label class="form-label">Price ($)</label>
+                        <input type="number" class="form-control mb-2" name="productPrice" id="editProductPrice"
+                            step="0.01" required>
+
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-control mb-2" name="productAmount" id="editAmount" required>
+                        <label class="form-label">Category</label>
+                        <select class="form-control mb-2" name="categoryProduct" id="editCategoryProduct">
+                            <option value="AO">Áo</option>
+                            <option value="BONGDA">Bóng Đá</option>
+                            <option value="QUAN">Quần</option>
+                            <option value="PHUKIEN">Phụ Kiện</option>
+                            <option value="CLB">Câu lạc bộ</option>
+                        </select>
+                        <label for="editProductImgPath" class="form-label">Upload Product Image</label>
+                        <input class="form-control mb-2" type="file" name="newProductImgPath" accept="image/*">
+
+                        <img id="currentProductImage" src="" class="img-thumbnail mt-2" width="120"
+                            alt="Current Product Image">
+                        <input type="hidden" name="productImgPath" id="editProductImgPath">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Add Match Modal -->
+    <div class="modal fade" id="addMatchModal" tabindex="-1" aria-labelledby="addMatchModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/matches/add}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addMatchModalLabel">Add Match</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" class="form-control mb-2" name="matchTitle" placeholder="Title" required>
+                        <input type="datetime-local" class="form-control mb-2" name="matchStartTime" required>
+                        <textarea class="form-control mb-2" name="matchDescription" placeholder="Description"
+                            required></textarea>
+                        <input type="url" class="form-control mb-2" name="matchLinkLivestream"
+                            placeholder="Livestream URL">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.add('d-none'));
+            document.getElementById(tabId).classList.remove('d-none');
+
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function openAddProductModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+            modal.show();
+        }
+
+        function openAddMatchModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addMatchModal'));
+            modal.show();
+        }
+
+        // Nếu user đồng ý khởi tạo lại
+        function confirmRegenerate() {
+            const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmRegenerateModal'));
+            confirmModal.hide();
+
+            const fixtureModal = new bootstrap.Modal(document.getElementById('autoFixtureModal'));
+            fixtureModal.show();
+        }
+
+        function openAddTicketModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addTicketModal'));
+            modal.show();
+        }
+
+        function updateTicketValues(ticketType) {
+            const quantities = document.querySelectorAll(`.ticket-quantity[data-type='${ticketType}']`);
+            const prices = document.querySelectorAll(`.ticket-price[data-type='${ticketType}']`);
+
+            // Lấy giá trị của ô đầu tiên trong loại vé được thay đổi (có thể lấy bất kỳ ô nào vì chúng đều đồng bộ)
+            const firstQuantity = quantities[0].value;
+            const firstPrice = prices[0].value;
+
+            // Cập nhật tất cả các ô của loại vé tương ứng
+            quantities.forEach(quantity => {
+                quantity.value = firstQuantity;
+            });
+
+            prices.forEach(price => {
+                price.value = firstPrice;
+            });
+        }
+
+        function submitDetailedTickets() {
+            const matchId = document.getElementById("matchId").value;
+            const tickets = [];
+
+            const quantities = document.querySelectorAll(".ticket-quantity");
+            const prices = document.querySelectorAll(".ticket-price");
+
+            for (let i = 0; i < quantities.length; i++) {
+                const quantity = parseInt(quantities[i].value);
+                const area = quantities[i].dataset.area;
+                const type = quantities[i].dataset.type;
+
+                const priceInput = Array.from(prices).find(p =>
+                    p.dataset.area === area && p.dataset.type === type
+                );
+                const price = parseFloat(priceInput.value);
+
+                // Chỉ thêm vé nếu số lượng > 0
+                if (quantity > 0) {
+                    tickets.push({
+                        ticketArea: area,
+                        ticketType: type,
+                        ticketPrice: price,
+                        ticketAmount: quantity
+                    });
+                }
+            }
+
+            // Kiểm tra nếu không có vé nào được chọn
+            if (tickets.length === 0) {
+                alert("Please enter quantity for at least one ticket.");
+                return;
+            }
+
+            // Gửi thông tin tickets lên server
+            fetch(`/admin/save-tickets?matchId=${matchId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(tickets)
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    alert("Error saving tickets.");
+                }
+            });
+        }
+
+
+
+
+    </script>
+
+    <script th:inline="javascript">
+        function openAutoFixtureModal() {
+            const hasAutoFixture = [[${ hasAutoFixtureSession }]];
+            if (hasAutoFixture) {
+                const confirmModal = new bootstrap.Modal(document.getElementById('confirmRegenerateModal'));
+                confirmModal.show();
+            } else {
+                const modal = new bootstrap.Modal(document.getElementById('autoFixtureModal'));
+                modal.show();
+            }
+        }
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rows = document.querySelectorAll(".request-info");
+
+            rows.forEach(cell => {
+                const raw = cell.textContent.trim();
+
+                if (raw.includes("Player(")) {
+                    const player = parsePlayer(raw);
+                    cell.innerHTML = `
+                    <div class="card shadow-sm border-0 p-2">
+                        <div class="d-flex align-items-center">
+                            <img src="${player.image}" alt="Player Image" class="me-3 rounded" width="80" height="80" style="object-fit: cover;">
+                            <div>
+                                <h6 class="mb-1">${player.name}</h6>
+                                <span class="badge bg-info text-dark me-1">#${player.number}</span>
+                                <span class="badge bg-primary">${player.position}</span><br>
+                                <small class="text-muted">${player.nationality}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                } else if (raw.includes("{")) {
+                    try {
+                        const data = JSON.parse(raw);
+                        if (data.blogTitle && data.blogContent) {
+                            cell.innerHTML = `
+                            <div class="card shadow-sm border-0 p-2">
+                                <div class="d-flex">
+                                    <img src="${data.blogThumnailPath}" alt="Thumbnail" class="me-3 rounded" width="80" height="80" style="object-fit: cover;">
+                                    <div>
+                                        <h6 class="mb-1">${data.blogTitle}</h6>
+                                        <p class="mb-0 small text-muted">${truncate(data.blogContent, 100)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        }
+                    } catch (e) {
+                        console.warn("Invalid JSON format", e);
+                    }
+                }
+            });
+
+            function parsePlayer(str) {
+                const get = (key) => {
+                    const match = str.match(new RegExp(`${key}=([^,)]*)`));
+                    return match ? match[1].trim() : '';
+                };
+                return {
+                    name: get("playerFullName"),
+                    number: get("playerNumber"),
+                    nationality: get("playerNationaly"),
+                    position: get("playerPosition"),
+                    image: get("playerImgPath")
+                };
+            }
+
+            function parseBlog(str) {
+                const get = (key) => {
+                    const match = str.match(new RegExp(`${key}=([^,)]*)`));
+                    return match ? match[1].trim() : '';
+                };
+                return {
+                    title: get("blogTitle"),
+                    content: get("blogContent"),
+                    thumbnail: get("blogThumnailPath")
+                };
+            }
+
+            function truncate(str, n) {
+                return str.length > n ? str.substring(0, n) + '...' : str;
+            }
+        });
+    </script>
+
+    <script>
+        function filterMatchesByRound() {
+            const selectedRound = document.getElementById("roundFilter").value.toLowerCase();
+            const rows = document.querySelectorAll("#matches tbody tr");
+
+            rows.forEach(row => {
+                const round = row.getAttribute("data-round")?.toLowerCase() || "";
+                if (!selectedRound || round === selectedRound) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script th:inline="javascript">
+        const revenueCtx = document.getElementById("revenueChart").getContext("2d");
+        const revenueChart = new Chart(revenueCtx, {
+            type: "bar", // bạn có thể thay bằng 'line'
+            data: {
+                labels: [[${ revenueMonths }]],
+                datasets: [{
+                    label: "Revenue (VND)",
+                    data: [[${ revenueValues }]],
+                    backgroundColor: "rgba(54, 162, 235, 0.6)",
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString() + " ₫";
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        function openEditMatchModal(button) {
+            document.getElementById('editMatchId').value = button.dataset.id;
+            document.getElementById('editMatchTitle').value = button.dataset.title;
+            document.getElementById('editMatchTime').value = button.dataset.start;
+            document.getElementById('editMatchDescription').value = button.dataset.description;
+            document.getElementById('editMatchLink').value = button.dataset.link;
+            document.getElementById('editMatchReferenceInformation').value = button.dataset.referenceinfor;
+
+            const modal = new bootstrap.Modal(document.getElementById('editMatchModal'));
+            modal.show();
+        }
+        function openEditTicketModal(button) {
+            document.getElementById("editTicketId").value = button.dataset.id;
+            document.getElementById("editTicketArea").value = button.dataset.area;
+            document.getElementById("editTicketType").value = button.dataset.type;
+            document.getElementById("editTicketAmount").value = button.dataset.amount;
+            document.getElementById("editTicketPrice").value = button.dataset.price;
+            document.getElementById("editTicketTitle").value = button.dataset.title;
+            document.getElementById("editTicketMatchId").value = button.dataset.matchid;
+
+            const modal = new bootstrap.Modal(document.getElementById('editTicketModal'));
+            modal.show();
+        }
+
+        function openEditProductModal(button) {
+            document.getElementById("editProductId").value = button.dataset.id;
+            document.getElementById("editProductName").value = button.dataset.name;
+            document.getElementById("editProductDescription").value = button.dataset.description;
+            document.getElementById("editCategoryProduct").value = button.dataset.category;
+            document.getElementById("editProductPrice").value = button.dataset.price;
+            document.getElementById("editAmount").value = button.dataset.quantity;
+            const imgPath = button.dataset.imgpath;
+            const imgPreview = document.getElementById("currentProductImage");
+            imgPreview.src = `${imgPath}`;
+
+            document.getElementById("editProductImgPath").value = imgPath;
+
+            const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            modal.show();
+        }
+
+
+
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltips.forEach(el => {
+                new bootstrap.Tooltip(el);
+            });
+        });
+    </script>
+
+    <script>
+        function filterTickets() {
+            const matchFilter = document.getElementById("filterMatch").value.toLowerCase();
+            const areaFilter = document.getElementById("filterArea").value.toLowerCase();
+            const typeFilter = document.getElementById("filterType").value.toLowerCase();
+
+            const rows = document.querySelectorAll("#tickets table tbody tr");
+
+            rows.forEach(row => {
+                const match = row.dataset.match?.toLowerCase() || "";
+                const area = row.dataset.area?.toLowerCase() || "";
+                const type = row.dataset.type?.toLowerCase() || "";
+
+                const matchOk = !matchFilter || match.includes(matchFilter);
+                const areaOk = !areaFilter || area === areaFilter;
+                const typeOk = !typeFilter || type === typeFilter;
+
+                if (matchOk && areaOk && typeOk) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Gắn sự kiện cho tất cả các ô quantity
+            document.querySelectorAll('.ticket-quantity').forEach(function (input) {
+                input.addEventListener('input', function () {
+                    const type = this.getAttribute('data-type');
+                    const allInputs = document.querySelectorAll(`.ticket-quantity[data-type='${type}']`);
+                    // Nếu là ô đầu tiên trong nhóm
+                    if (this === allInputs[0]) {
+                        const value = this.value;
+                        allInputs.forEach(i => i.value = value);
+                    }
+                    // Nếu không phải ô đầu tiên, không làm gì cả
+                });
+            });
+
+            // Gắn sự kiện cho tất cả các ô price
+            document.querySelectorAll('.ticket-price').forEach(function (input) {
+                input.addEventListener('input', function () {
+                    const type = this.getAttribute('data-type');
+                    const allInputs = document.querySelectorAll(`.ticket-price[data-type='${type}']`);
+                    if (this === allInputs[0]) {
+                        const value = this.value;
+                        allInputs.forEach(i => i.value = value);
+                    }
+                });
+            });
+        });
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script>
+        // 🔐 Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyd5TZhM1w9tI6eFGBT6PRKX8aNpxpad0",
+            authDomain: "mylea-fb2c4.firebaseapp.com",
+            databaseURL: "https://mylea-fb2c4-default-rtdb.firebaseio.com",
+            projectId: "mylea-fb2c4",
+            storageBucket: "mylea-fb2c4.firebasestorage.app",
+            messagingSenderId: "94061702332",
+            appId: "1:94061702332:web:30538806b6d159d24534b9",
+            measurementId: "G-H3PF6MWEXB"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const userList = document.getElementById("userList");
+        const messagesDiv = document.getElementById("messages");
+        const messageInput = document.getElementById("messageInput");
+        const activeUserSpan = document.getElementById("activeUser");
+
+        let currentUserId = null;
+        let chatRef = null;
+
+        // Load user list
+        db.ref("chat").on("child_added", snap => {
+            const uid = snap.key;
+            const div = document.createElement("div");
+            div.className = "user";
+            div.textContent = uid;
+            div.style.cursor = "pointer";
+            div.onclick = () => loadChat(uid);
+            userList.appendChild(div);
+        });
+
+        function loadChat(userId) {
+            if (chatRef) chatRef.off();
+
+            currentUserId = userId;
+            activeUserSpan.textContent = "Chatting with: " + userId;
+            messagesDiv.innerHTML = "";
+
+            chatRef = db.ref("chat/" + userId);
+            chatRef.on("child_added", snap => {
+                const msg = snap.val();
+                const p = document.createElement("p");
+                p.textContent = (msg.from === "admin" ? "👑 Admin" : "🧑 User") + ": " + msg.text;
+                messagesDiv.appendChild(p);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+        }
+
+        function sendMessage() {
+            if (!currentUserId) return alert("Select a user first!");
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            db.ref("chat/" + currentUserId).push({
+                text: text,
+                from: "admin",
+                timestamp: Date.now()
+            });
+
+            messageInput.value = "";
+        }
+    </script>
+
+
+
+</body>
+
+</html>

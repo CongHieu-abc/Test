@@ -1,0 +1,451 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="${product.productName}">Product Detail</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      font-family: 'Segoe UI', sans-serif;
+      animation: fadeIn 0.8s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-section {
+      background: linear-gradient(135deg, #00ff87 0%, #000000 100%);
+      padding: 20px 0;
+      box-shadow: 0 4px 20px rgba(58, 0, 58, 0.3);
+    }
+
+    .logo {
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .logo:hover {
+      color: #00ff87;
+      transform: scale(1.05);
+      text-decoration: none;
+    }
+
+    .back-button {
+      background-color: #00ff87;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+    }
+
+    .back-button:hover {
+      background-color: #00ff87;
+      color: white;
+      text-decoration: none;
+    }
+
+    .product-img {
+      max-width: 100%;
+      border-radius: 12px;
+      background-color: #fff;
+      padding: 20px;
+      transition: all 0.4s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .features-box {
+      background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(124, 58, 237, 0.1);
+    }
+
+    .features-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      border-color: #00ff87;
+    }
+
+    .product-price {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #00ff87;
+    }
+
+    .size-button {
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      margin: 6px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .size-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(124, 58, 237, 0.3);
+    }
+
+    .size-button:checked + label {
+      background-color: #00ff87;
+      color: white;
+      border-color: #00ff87;
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+    }
+
+    .recommend-card {
+      transition: all 0.3s ease;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+      border: 1px solid rgba(124, 58, 237, 0.1);
+      cursor: pointer;
+    }
+
+    .recommend-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      border-color: rgba(124, 58, 237, 0.3);
+    }
+
+    .recommend-card img {
+      height: 150px;
+      object-fit: contain;
+      margin-bottom: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .recommend-card:hover img {
+      transform: scale(1.1);
+    }
+
+    .recommend-card a {
+      color: inherit;
+    }
+
+    .recommend-card a:hover {
+      color: inherit;
+    }
+
+    .recommend-card:hover .text-primary {
+      color: #00ff87 !important;
+    }
+
+    .footer {
+      background: linear-gradient(135deg, #f1f1f1 0%, #e8e8e8 100%);
+      padding: 40px 0;
+      border-top: 3px solid #00ff87;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .footer h6 {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .partner-logos img {
+      max-height: 30px;
+      margin: 10px;
+      transition: all 0.3s ease;
+      filter: grayscale(0.5);
+    }
+
+    .partner-logos img:hover {
+      transform: scale(1.2);
+      filter: grayscale(0);
+    }
+
+    .btn-primary {
+      background-color: #00ff87 !important;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(59, 252, 200, 0.2);
+    }
+
+    .btn-primary:hover {
+      background-color: #00ff87;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(59, 252, 200, 0.2);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .cart-button {
+      background-color: #00ff87;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      transition: all 0.3s ease;
+      animation: pulse 2s infinite;
+    }
+
+    .cart-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div th:replace="fragments/header :: siteHeader"></div>
+
+  <!-- Header -->
+  <div class="header-section">
+    <div class="container">
+      <a href="/" class="logo">
+        ⚽ SuperLeague Shop
+      </a>
+    </div>
+  </div>
+
+  <button class="cart-button position-fixed top-0 end-0 m-3" style="z-index: 1060;" th:onclick="toggleCart()">
+    🛒
+  </button>
+
+  <div class="cart-overlay" id="cartOverlay"
+    style="position: fixed; top: 0; right: 0; width: 400px; height: 100vh; background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%); box-shadow: -5px 0 25px rgba(0,0,0,0.2); z-index: 1050; transform: translateX(100%); transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); overflow-y: auto; border-left: 3px solid #00ff87;">
+    <div class="p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Giỏ hàng của bạn</h5>
+        <button class="btn-close" th:onclick="closeCart()"></button>
+      </div>
+      <p th:if="${#lists.isEmpty(cartProducts)}">Giỏ hàng của bạn đang trống</p>
+
+      <div th:if="${!#lists.isEmpty(cartProducts)}">
+        <div class="mb-3 border-bottom pb-3" th:each="item : ${cartProducts}">
+            <div class="d-flex align-items-center gap-3">
+                <img th:src="@{${item.value.product.productImgPath}}" class="img-fluid rounded"
+                    style="width:80px;height:80px;object-fit:cover;" />
+                <div class="flex-grow-1">
+                    <h6 th:text="${item.value.product.productName}" class="mb-1">Product Name</h6>
+                    <p class="text-muted mb-2"
+                        th:text="(${item.value.product.productPrice} * ${item.value.productAmount}) + 'đ'">0.00đ
+                    </p>
+                    <div class="quantity-control">
+                        <a th:href="@{'/product/dp'(productId=${item.key}, showCart='true')}">-</a>
+                        <span th:text="${item.value.productAmount}" class="fw-bold">1</span>
+                        <a th:href="@{'/product/ip'(productId=${item.key}, showCart='true')}">+</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-grid gap-2">
+            <a class="btn btn-primary" th:href="@{/payment/checkout}">Thanh Toán</a>
+        </div>
+    </div>
+      <hr />
+      <h6>Danh mục phổ biến</h6>
+      <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-outline-secondary btn-sm">Bóng đá</button>
+        <button class="btn btn-outline-secondary btn-sm">Bộ sưu tập V.League</button>
+        <button class="btn btn-outline-secondary btn-sm">Phụ kiện</button>
+      </div>
+      <h6>Sản phẩm phổ biến</h6>
+      <div class="d-flex overflow-auto gap-3" th:if="${popularProducts}">
+        <div style="min-width: 150px;" th:each="p : ${popularProducts}">
+          <a th:href="@{'/product/' + ${p.productId}}" class="text-decoration-none">
+            <img th:src="@{${p.productImgPath}}" class="img-fluid rounded mb-1" />
+            <small class="text-dark" th:text="${p.productName}">Tên sản phẩm</small>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <!-- Back Button -->
+    <a href="http://localhost:8080/product" class="back-button">
+      ← Trở lại trang sản phẩm
+    </a>
+
+    <div class="row g-4">
+      <!-- Images -->
+      <div class="col-md-6">
+        <div class="d-flex gap-3">
+          <img th:src="@{${product.productImgPath}}" class="product-img w-50" alt="Mặt trước" />
+          <img th:src="@{${product.productImgPath}}" class="product-img w-50" alt="Mặt sau" />
+        </div>
+      </div>
+
+      <!-- Product Info + Add to Cart Form -->
+      <div class="col-md-6">
+        <form th:action="@{/cart}" method="post" id="addToCartForm">
+          <input type="hidden" name="productId" th:value="${product.productId}" />
+          <input type="hidden" name="url" th:value="${null}" />
+          <input type="hidden" name="productAmount" th:value="1" />
+
+          <h5 class="text-muted">V.League</h5>
+          <h3 th:text="${product.productName}"></h3>
+          <p class="product-price" th:text="${product.productPrice} + ' đ VNĐ'"></p>
+
+
+
+          <!-- <div class="mb-2">Kích thước:</div>
+          <div class="mb-3 d-flex flex-wrap">
+            <div class="me-2" th:each="size : ${productSizes}">
+              <input type="radio" class="btn-check" name="size" th:id="${size.name()}" th:value="${size.name()}" required/>
+              <label class="btn btn-outline-dark size-button" th:for="${size.name()}" th:text="${size.name()}"></label>
+            </div>
+          </div>
+          <div id="sizeError" class="error-message" style="display: none;">Vui lòng chọn kích thước trước khi thêm vào giỏ hàng!</div> -->
+
+          <button type="submit" class="btn btn-primary w-100">
+            Thêm vào giỏ hàng
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="row mt-5">
+      <div class="col-md-6">
+        <div class="features-box">
+          <h6>Mô tả sản phẩm</h6>
+          <p th:text="${product.productDescription}" class="lead mb-0">
+            Mang V.League vào buổi tập luyện của bạn với chiếc áo này...
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="features-box">
+          <h6>Thông tin vận chuyển</h6>
+          <ul class="small">
+            <li>Giao hàng tiêu chuẩn: 2-3 ngày làm việc - 30.000 đ VNĐ</li>
+            <li>MIỄN PHÍ cho đơn hàng trên 500.000 đ VNĐ</li>
+            <li>Giao hàng nhanh: 1-2 ngày làm việc - 50.000 đ VNĐ</li>
+            <li>Giao hàng trong ngày (Hà Nội, TP.HCM): 70.000 đ VNĐ</li>
+            <li>Thanh toán khi nhận hàng (COD)</li>
+            <li>Đổi trả miễn phí trong 30 ngày</li>
+            <li>Bảo hành chính hãng</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="mt-5">
+      <h5 class="mb-3">Bạn có thể thích</h5>
+      <div class="row row-cols-2 row-cols-md-4 g-4 mt-2">
+        <div class="col" th:each="item : ${relatedProducts}">
+          <a th:href="@{'/product/' + ${item.productId}}" class="text-decoration-none">
+            <div class="card h-100 recommend-card p-3 text-center">
+              <img th:src="@{${item.productImgPath}}" class="img-fluid" />
+              <div class="fw-bold text-dark" th:text="${item.productName}">Áo tập luyện</div>
+              <div class="text-muted small">1 Màu</div>
+              <div class="fw-bold text-primary" th:text="${item.productPrice} + ' đ VNĐ'">0 đ VNĐ</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer mt-5">
+    <div class="container">
+      <div class="row text-center text-md-start">
+        <div class="col-md-3">
+          <h6>Cửa hàng</h6>
+          <ul class="list-unstyled small">
+            <li><a href="/products?category=tshirts">Áo thun</a></li>
+            <li><a href="/products?category=hoodies">Áo khoác</a></li>
+            <li><a href="/products?category=accessories">Phụ kiện</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h6>Hỗ trợ</h6>
+          <ul class="list-unstyled small">
+            <li><a href="#">Vận chuyển</a></li>
+            <li><a href="#">Đổi trả</a></li>
+            <li><a href="#">Theo dõi đơn hàng</a></li>
+          </ul>
+        </div>
+        <div class="col-md-6 text-center text-md-start partner-logos">
+          <h6>Đối tác</h6>
+          <img src="/images/logos/puma.png" />
+          <img src="/images/logos/barclays.png" />
+          <img src="/images/logos/coke.png" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function toggleCart() {
+      const cart = document.getElementById('cartOverlay');
+      if (cart.style.transform === 'translateX(0%)') {
+        cart.style.transform = 'translateX(100%)';
+      } else {
+        cart.style.transform = 'translateX(0%)';
+      }
+    }
+
+    function closeCart() {
+      document.getElementById('cartOverlay').style.transform = 'translateX(100%)';
+    }
+
+    
+  </script>
+</body>
+
+</html>

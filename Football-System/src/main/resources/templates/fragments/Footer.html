@@ -1,0 +1,195 @@
+<!-- fragments/footer.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="siteFooter">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== Premier League Style Footer ===== */
+    .pl-footer {
+      background-color: #111;
+      color: #ddd;
+      padding: 3rem 0 1rem;
+      font-family: 'Inter', sans-serif;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .pl-footer .footer-top {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .pl-footer .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-decoration: none;
+    }
+
+    .pl-footer .footer-logo img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .pl-footer .footer-description {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      margin-top: 0.5rem;
+    }
+
+    /* ===== Footer Links ===== */
+    .pl-footer .footer-section h6 {
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .pl-footer .footer-section ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .pl-footer .footer-section li {
+      margin-bottom: 0.6rem;
+    }
+
+    .pl-footer .footer-section a {
+      color: #aaa;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      position: relative;
+    }
+
+    .pl-footer .footer-section a:hover {
+      color: #fff;
+      transform: translateX(3px);
+    }
+
+    .pl-footer .footer-section a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #fff;
+      transition: width 0.3s ease;
+    }
+
+    .pl-footer .footer-section a:hover::after {
+      width: 100%;
+    }
+
+    /* ===== Footer Bottom ===== */
+    .pl-footer .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 2rem;
+      padding-top: 1.2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* ===== Social Icons ===== */
+    .pl-footer .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 1rem;
+    }
+
+    .pl-footer .social-links a {
+      color: #aaa;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+    }
+
+    .pl-footer .social-links a:hover {
+      color: #fff;
+      transform: scale(1.15);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .pl-footer {
+        text-align: center;
+      }
+
+      .pl-footer .footer-section {
+        margin-bottom: 1.5rem;
+      }
+    }
+  </style>
+
+  <!-- ===== Footer Content ===== -->
+  <footer class="pl-footer">
+    <div class="container">
+      <!-- Logo & Brand -->
+      <div class="footer-top">
+        <a th:href="@{/home}" class="footer-logo">
+          <!-- <img th:src="@{/images/logo.png}" alt="MyLeague"> -->
+          <span>SuperLeague</span>
+        </a>
+        <p class="footer-description">Your Premier Football Hub — Scores, Fixtures, Stats & More</p>
+
+        <div class="social-links">
+          <a href="#"><i class="bi bi-facebook"></i></a>
+          <a href="#"><i class="bi bi-twitter-x"></i></a>
+          <a href="#"><i class="bi bi-instagram"></i></a>
+          <a href="#"><i class="bi bi-youtube"></i></a>
+        </div>
+      </div>
+
+      <!-- Footer Links -->
+      <div class="row justify-content-center text-center text-md-start">
+        <div class="col-md-4 footer-section">
+          <h6>Competition</h6>
+          <ul>
+            <li><a th:href="@{/home}">Home</a></li>
+            <li><a th:href="@{/match/fixture}">Fixtures</a></li>
+            <li><a th:href="@{/match}">Results</a></li>
+          </ul>
+        </div>
+
+        <div class="col-md-4 footer-section">
+          <h6>Information</h6>
+          <ul>
+            <li><a th:href="@{/club}">Clubs</a></li>
+            <li><a th:href="@{/news}">News</a></li>
+            <li><a th:href="@{/tables(season=${#calendars.year(#calendars.createNow())})}">Tables</a></li>
+          </ul>
+        </div>
+
+        <div class="col-md-4 footer-section">
+          <h6>Support</h6>
+          <ul>
+            <li><a th:href="@{/feedback}">Feedback</a></li>
+            <li><a th:href="@{/home}">Terms & Policy</a></li>
+            <li><a th:href="@{/home}">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Footer Bottom -->
+      <div class="footer-bottom">
+        <p>&copy; 2025 SuperLeague. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+</body>
+</html>
